@@ -1,0 +1,80 @@
+[versions]
+clix = "1.0.0"
+# Plugins
+android-gradle-plugin = "8.9.2"
+gms = "4.4.2"
+compose-compiler = "1.5.15"
+
+# Android
+android-activity-compose = "1.10.1"
+android-core-ktx = "1.16.0"
+android-app-compat = "1.7.1"
+compose-bom = "2025.03.01"
+
+# Kotlin
+kotlin = "1.9.25"
+kotlinx-coroutines = "1.8.1"
+kotlinx-serialization-json = "1.6.3"
+
+# Firebase
+firebase-messaging = "24.0.0"
+
+# Test / CI
+junit = "4.13.2"
+mockk = "1.14.2"
+robolectric = "4.14.1"
+jacoco = "0.8.13"
+ktfmt = "0.22.0"
+detekt = "1.23.8"
+
+# Release
+jreleaser = "1.18.0"
+commons-compress = "1.27.1"
+
+# SDK
+compileSdk = "35"
+minSdk = "23"
+minCompileSdk = "28"
+
+[libraries]
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "android-activity-compose" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "android-core-ktx" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "android-app-compat" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-playservices = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
+compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
+compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
+compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
+compose-ui = { group = "androidx.compose.ui", name = "ui" }
+compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+firebase-messaging-ktx = { group = "com.google.firebase", name = "firebase-messaging-ktx", version.ref = "firebase-messaging" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+commons-compress = { group = "org.apache.commons", name = "commons-compress", version.ref = "commons-compress" }
+
+[plugins]
+maven-publish = { id = "maven-publish" }
+jreleaser = { id = "org.jreleaser", version.ref = "jreleaser" }
+android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
+android-library = { id = "com.android.library", version.ref = "android-gradle-plugin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+gms = { id = "com.google.gms.google-services", version.ref = "gms" }
+jacoco = { id = "jacoco" }
+ktfmt-gradle = { id = "com.ncorti.ktfmt.gradle", version.ref = "ktfmt" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+
+[bundles]
+coroutines = ["kotlinx-coroutines-android", "kotlinx-coroutines-playservices"]
+compose = [
+  "compose-runtime",
+  "compose-foundation",
+  "compose-ui",
+  "compose-ui-tooling-preview",
+  "compose-material3",
+]

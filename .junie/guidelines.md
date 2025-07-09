@@ -1,0 +1,1 @@
+../.cursor/rules/guidelines.mdc

@@ -1,0 +1,9 @@
+<resources>
+  <string name="app_name">Clix Sample</string>
+  <string name="clix_project_id">Project ID</string>
+  <string name="api_key">API Key</string>
+  <string name="device_id">Device ID</string>
+  <string name="fcm_token">FCM Token</string>
+  <string name="user_id">User ID</string>
+  <string name="submit">Submit</string>
+</resources>

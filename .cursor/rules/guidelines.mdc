@@ -1,0 +1,123 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Kotlin Android Library Project Guide
+
+You are an expert in coding Kotlin libraries for Android.
+You always write clean, maintainable, bug-free, secure, and production-grade Kotlin code.
+Follow Kotlin and Android best practices.
+Your descriptions must be short, precise, and complete.
+Do not remove or omit any comments but strip header comments from your code.
+Always fully implement requested functionality without leaving TODOs or placeholders.
+All outputs must be fully working, production-usable Kotlin code.
+
+## Kotlin Compatibility Requirements:
+- Minimum Kotlin version: **Kotlin 2.x**
+- Minimum Android deployment target: **Android API 21** or higher
+- All language features and libraries must be compatible with specified versions
+- Newer APIs available only in later Android versions must be properly guarded using version checks
+
+## Kotlin Android Library Project Structure:
+
+- Root
+  - clix/
+    - src/
+      - main/
+        - kotlin/
+          - so/
+            - clix/
+              - core/
+                - Core functionalities (business logic, core managers)
+              - models/
+                - Data models (entities, DTOs, response types)
+              - notification/
+                - Notification-related components
+              - services/
+                - Networking, persistence, analytics services
+              - utils/
+                - Utilities, helpers, simple tools
+                - http/
+                  - HTTP utilities
+                - logging/
+                  - Logging utilities
+        - res/
+          - drawable/
+          - values/
+      - test/
+        - kotlin/
+          - so/
+            - clix/
+              - Unit tests mirroring main structure
+  - samples/
+    - Example applications
+
+## Kotlin File Naming Rules:
+- Service, Repository suffix for classes handling external services
+- Singular descriptive names for Models (e.g., `User`, `AuthToken`)
+- Extensions must be named `TypeName+Extensions.kt`
+- Utility classes/functions grouped logically
+
+## Kotlin Development Rules:
+
+### 1. Architecture
+- Follow Clean Architecture principles
+- Separation of concerns with domain logic decoupled from infrastructure
+- Use MVVM for UI components
+- Prefer manual constructor injection; use Hilt only if multiple implementations needed
+
+### 2. State and Data
+- Define domain models as immutable `data class`es
+- Keep models serialization-agnostic
+- Use sealed classes for finite states or results
+
+### 3. Error Handling
+- Use functional error wrappers (sealed classes) in domain logic
+- Throw exceptions only for unrecoverable errors
+- Centralize exception-to-UI mapping in ViewModel or middleware
+
+### 4. Asynchronous Programming
+- Use Kotlin Coroutines for asynchronous operations
+- Handle side effects explicitly in repository or service classes
+- Ensure thread safety for shared mutable state
+
+### 5. Testing
+- Use JUnit4/Kotest for unit tests; AndroidX Test & Robolectric for instrumentation
+- Follow `Given-When-Then` and `it(target) should ...` naming
+- Use property-based tests for pure functions where applicable
+- Use Stub and Spy patterns via MockK
+
+### 6. Code Style
+- Write small, pure, composable functions
+- Favor immutability and explicit side effects
+- Use descriptive names and expression-style functions
+- Public → Internal → Private grouping order
+
+### 7. Modularity and Performance
+- Build modules and services to be independently reusable
+- Avoid reflection, annotations, and metaprogramming unless necessary
+
+### 8. Serialization
+- Use **kotlinx.serialization** for JSON
+- Map to/from DTOs at the boundary
+
+### Strict Requirements:
+- No service locators or singletons (unless absolutely necessary)
+- Domain logic must be pure and side-effect-free
+- Test with Stub or MockK doubles
+- No reflection under any circumstances
+
+### Technology Stack:
+- **Language**: Kotlin 2.x
+- **UI**: Jetpack Compose 1.x or Android Views where necessary
+- **JSON**: kotlinx.serialization.json
+- **Firebase**: Use Firebase BOM and relevant modules via version catalog
+- **Local Storage**: DataStore Preferences
+- **Concurrency**: Kotlin Coroutines
+- **Static Analysis**: ktfmt, detekt, jacoco via Gradle version catalog
+- **Build**: Gradle 8.x (Kotlin DSL), JVM 21
+- **Test**: JUnit4, MockK, Robolectric, AndroidX Test
+
+### Core Philosophy:
+**Clean architecture. Functional programming. Testable and maintainable Android library code.**
