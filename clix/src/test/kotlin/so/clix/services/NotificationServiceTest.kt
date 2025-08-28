@@ -7,11 +7,9 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
-import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -88,7 +86,8 @@ class NotificationServiceTest {
     @Test
     fun `it should throw exception when notification preferences are enabled but no permission`() {
         // This test verifies that ClixError.NotificationPermissionDenied has the expected message
-        // Since we can't easily mock Build.VERSION.SDK_INT in tests, we'll just verify the error message
+        // Since we can't easily mock Build.VERSION.SDK_INT in tests, we'll just verify the error
+        // message
 
         // Import the ClixError class
         val error = ClixError.NotificationPermissionDenied
@@ -104,8 +103,10 @@ class NotificationServiceTest {
             val enabled = false
             val categories = listOf("news", "promotions")
 
-            // We can't easily mock Build.VERSION.SDK_INT, so we'll just mock the context permission check
-            // which is what the hasNotificationPermission method uses to determine if permission is granted
+            // We can't easily mock Build.VERSION.SDK_INT, so we'll just mock the context permission
+            // check
+            // which is what the hasNotificationPermission method uses to determine if permission is
+            // granted
 
             // Mock context to return PERMISSION_DENIED for notification permission
             every {
@@ -125,7 +126,8 @@ class NotificationServiceTest {
         notificationService.reset()
 
         // Then
-        // We can't easily verify the exact calls to storageService.remove with a real StorageService
+        // We can't easily verify the exact calls to storageService.remove with a real
+        // StorageService
         // Just verify that notificationManager.cancelAll() was called
         verify { notificationManager.cancelAll() }
     }

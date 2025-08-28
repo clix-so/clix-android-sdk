@@ -7,8 +7,8 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.spyk
 import io.mockk.slot
+import io.mockk.spyk
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Before
@@ -44,30 +44,30 @@ class EventServiceTest {
         eventService = spyk(EventService())
 
         // Mock the trackEvent method to use our mock EventAPIService
-        coEvery {
-            eventService.trackEvent(any(), any(), any())
-        } coAnswers {
-            val name = arg<String>(0)
-            val properties = arg<Map<String, Any?>>(1)
-            val messageId = arg<String?>(2)
+        coEvery { eventService.trackEvent(any(), any(), any()) } coAnswers
+            {
+                val name = arg<String>(0)
+                val properties = arg<Map<String, Any?>>(1)
+                val messageId = arg<String?>(2)
 
-            val customProperty =
-                properties.mapValues { (_, value) ->
-                    when (value) {
-                        is Boolean -> JsonPrimitive(value)
-                        is Number -> JsonPrimitive(value)
-                        is String -> JsonPrimitive(value)
-                        null -> JsonPrimitive("null")
-                        else -> JsonPrimitive(value.toString())
+                val customProperty =
+                    properties.mapValues { (_, value) ->
+                        when (value) {
+                            is Boolean -> JsonPrimitive(value)
+                            is Number -> JsonPrimitive(value)
+                            is String -> JsonPrimitive(value)
+                            null -> JsonPrimitive("null")
+                            else -> JsonPrimitive(value.toString())
+                        }
                     }
-                }
 
-            val eventProperty = EventProperty(messageId = messageId, customProperties = customProperty)
+                val eventProperty =
+                    EventProperty(messageId = messageId, customProperties = customProperty)
 
-            eventAPIService.trackEvents(
-                listOf(EventForRequest("test-device-id", name, eventProperty))
-            )
-        }
+                eventAPIService.trackEvents(
+                    listOf(EventForRequest("test-device-id", name, eventProperty))
+                )
+            }
     }
 
     @Test
