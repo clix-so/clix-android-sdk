@@ -33,7 +33,7 @@ commons-compress = "1.27.1"
 
 # SDK
 compileSdk = "35"
-minSdk = "23"
+minSdk = "26"
 minCompileSdk = "28"
 
 [libraries]
