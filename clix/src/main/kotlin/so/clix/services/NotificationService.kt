@@ -191,8 +191,8 @@ internal class NotificationService(
 
     suspend fun handleNotificationTapped(
         messageId: String,
-        userJourneyId: String?,
-        userJourneyNodeId: String?,
+        userJourneyId: String? = null,
+        userJourneyNodeId: String? = null,
     ) {
         try {
             trackPushNotificationTappedEvent(messageId, userJourneyId, userJourneyNodeId)
