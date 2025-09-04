@@ -54,6 +54,8 @@ class NotificationTappedActivity : AppCompatActivity() {
 
         val messageId = intent.getStringExtra("messageId")
         val landingUrl = intent.getStringExtra("landingUrl")
+        val userJourneyId = intent.getStringExtra("userJourneyId")
+        val userJourneyNodeId = intent.getStringExtra("userJourneyNodeId")
 
         if (messageId == null) {
             ClixLogger.warn("messageId is null in intent extras")
@@ -61,7 +63,13 @@ class NotificationTappedActivity : AppCompatActivity() {
         }
         ClixLogger.debug("Extracted messageId: $messageId")
 
-        Clix.coroutineScope.launch { Clix.notificationService.handleNotificationTapped(messageId) }
+        Clix.coroutineScope.launch {
+            Clix.notificationService.handleNotificationTapped(
+                messageId,
+                userJourneyId,
+                userJourneyNodeId,
+            )
+        }
 
         try {
             val destinationIntent = createIntentToOpenUrlOrApp(landingUrl)

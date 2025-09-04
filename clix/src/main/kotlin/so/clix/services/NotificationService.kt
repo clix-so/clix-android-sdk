@@ -106,6 +106,8 @@ internal class NotificationService(
             Intent(context, NotificationTappedActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 putExtra("messageId", payload.messageId)
+                putExtra("userJourneyId", payload.userJourneyId)
+                putExtra("userJourneyNodeId", payload.userJourneyNodeId)
                 putExtra("landingUrl", payload.landingUrl)
             }
 
@@ -138,12 +140,30 @@ internal class NotificationService(
         NotificationManagerCompat.from(context).notify(notificationId, notification)
     }
 
-    private suspend fun trackPushNotificationReceivedEvent(messageId: String) {
-        eventService.trackEvent(name = "PUSH_NOTIFICATION_RECEIVED", messageId = messageId)
+    private suspend fun trackPushNotificationReceivedEvent(
+        messageId: String,
+        userJourneyId: String?,
+        userJourneyNodeId: String?,
+    ) {
+        eventService.trackEvent(
+            name = "PUSH_NOTIFICATION_RECEIVED",
+            messageId = messageId,
+            userJourneyId = userJourneyId,
+            userJourneyNodeId = userJourneyNodeId,
+        )
     }
 
-    private suspend fun trackPushNotificationTappedEvent(messageId: String) {
-        eventService.trackEvent(name = "PUSH_NOTIFICATION_TAPPED", messageId = messageId)
+    private suspend fun trackPushNotificationTappedEvent(
+        messageId: String,
+        userJourneyId: String? = null,
+        userJourneyNodeId: String? = null,
+    ) {
+        eventService.trackEvent(
+            name = "PUSH_NOTIFICATION_TAPPED",
+            messageId = messageId,
+            userJourneyId = userJourneyId,
+            userJourneyNodeId = userJourneyNodeId,
+        )
     }
 
     suspend fun handleNotificationReceived(payload: ClixPushNotificationPayload) {
@@ -155,7 +175,11 @@ internal class NotificationService(
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
                 showNotification(payload)
-                trackPushNotificationReceivedEvent(payload.messageId)
+                trackPushNotificationReceivedEvent(
+                    payload.messageId,
+                    payload.userJourneyId,
+                    payload.userJourneyNodeId,
+                )
                 ClixLogger.debug("Message received, notification sent to Clix SDK")
             } else {
                 ClixLogger.warn("Notification permission not granted, cannot show notification")
@@ -165,9 +189,13 @@ internal class NotificationService(
         }
     }
 
-    suspend fun handleNotificationTapped(messageId: String) {
+    suspend fun handleNotificationTapped(
+        messageId: String,
+        userJourneyId: String?,
+        userJourneyNodeId: String?,
+    ) {
         try {
-            trackPushNotificationTappedEvent(messageId)
+            trackPushNotificationTappedEvent(messageId, userJourneyId, userJourneyNodeId)
             ClixLogger.debug("Notification tapped, tracking event for messageId: $messageId")
         } catch (e: Exception) {
             ClixLogger.error("Failed to handle notification tapped", e)

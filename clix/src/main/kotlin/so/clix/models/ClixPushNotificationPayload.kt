@@ -7,6 +7,8 @@ internal data class ClixPushNotificationPayload(
     val title: String,
     val body: String,
     val messageId: String,
+    val userJourneyId: String? = null,
+    val userJourneyNodeId: String? = null,
     val landingUrl: String? = null,
     val imageUrl: String? = null,
 )

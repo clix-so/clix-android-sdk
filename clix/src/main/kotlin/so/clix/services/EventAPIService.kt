@@ -4,8 +4,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonPrimitive
 
 @Serializable
-internal data class EventProperty(
+internal data class EventProperties(
     val messageId: String? = null,
+    val userJourneyId: String? = null,
+    val userJourneyNodeId: String? = null,
     val customProperties: Map<String, JsonPrimitive>,
 )
 
@@ -13,7 +15,7 @@ internal data class EventProperty(
 internal data class EventForRequest(
     val deviceId: String,
     val name: String,
-    val eventProperty: EventProperty,
+    val properties: EventProperties,
 )
 
 @Serializable
@@ -21,7 +23,7 @@ internal data class Event(
     val userId: String,
     val deviceId: String,
     val name: String,
-    val eventProperty: EventProperty,
+    val properties: EventProperties,
 )
 
 @Serializable internal data class CreateEventsRequest(val events: List<EventForRequest>)
