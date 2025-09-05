@@ -33,7 +33,7 @@ private constructor( // Primary constructor for serialization
                 adId = getAdId(context),
                 model = Build.MODEL,
                 manufacturer = Build.MANUFACTURER,
-                platform = "Android",
+                platform = "DEVICE_PLATFORM_TYPE_ANDROID",
                 osName = "Android",
                 osVersion = Build.VERSION.RELEASE,
                 appName = context.packageName,

@@ -10,7 +10,7 @@ Add the following to your project's `settings.gradle.kts` or `build.gradle.kts`:
 
 ```kotlin
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
 ```
 
@@ -18,7 +18,7 @@ Add the dependency to your app's `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("so.clix:clix-android-sdk:1.0.0")
+    implementation("so.clix:clix-android-sdk:1.0.1")
 }
 ```
 
@@ -45,22 +45,22 @@ import so.clix.ClixConfig
 import so.clix.ClixLogLevel
 
 class MyApplication : Application() {
-    override fun onCreate() {
-        super.onCreate()
-        lifecycleScope.launch {
-            try {
-                Clix.initialize(
-                    ClixConfig(
-                        apiKey = "YOUR_API_KEY",
-                        endpoint = "https://api.clix.so", // Optional: default is https://api.clix.so
-                        logLevel = ClixLogLevel.INFO      // Optional: default is INFO
-                    )
-                )
-            } catch (e: Exception) {
-                // Handle initialization failure
-            }
-        }
+  override fun onCreate() {
+    super.onCreate()
+    lifecycleScope.launch {
+      try {
+        Clix.initialize(
+          ClixConfig(
+            apiKey = "YOUR_API_KEY",
+            endpoint = "https://api.clix.so", // Optional: default is https://api.clix.so
+            logLevel = ClixLogLevel.INFO      // Optional: default is INFO
+          )
+        )
+      } catch (e: Exception) {
+        // Handle initialization failure
+      }
     }
+  }
 }
 ```
 
@@ -72,12 +72,12 @@ Clix.setUserId("user123")
 
 // Set user properties
 Clix.setUserProperties(
-    mapOf(
-        "name" to "John Doe",
-        "email" to "john@example.com",
-        "age" to 25,
-        "premium" to true
-    )
+  mapOf(
+    "name" to "John Doe",
+    "email" to "john@example.com",
+    "age" to 25,
+    "premium" to true
+  )
 )
 
 // Remove a property
@@ -92,11 +92,11 @@ Clix.removeUserId()
 ```kotlin
 // Track an event with properties
 Clix.trackEvent(
-    "button_clicked",
-    mapOf(
-        "button_id" to "login_button",
-        "screen" to "login"
-    )
+  "button_clicked",
+  mapOf(
+    "button_id" to "login_button",
+    "screen" to "login"
+  )
 )
 ```
 
@@ -127,7 +127,7 @@ Clix SDK supports push notification integration via `ClixMessagingService`.
 This approach automates push notification handling, device token management, and event tracking.
 
 1. **Enable Push Notifications in your project**
-   - Configure Firebase Cloud Messaging and add `google-services.json` to your app module.
+  - Configure Firebase Cloud Messaging and add `google-services.json` to your app module.
 2. **Inherit from ClixMessagingService in your service**
 
 ```kotlin
@@ -135,15 +135,15 @@ import com.google.firebase.messaging.RemoteMessage
 import so.clix.ClixMessagingService
 
 class MyMessagingService : ClixMessagingService() {
-    override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        super.onMessageReceived(remoteMessage)
-        // Custom notification handling
-    }
+  override fun onMessageReceived(remoteMessage: RemoteMessage) {
+    super.onMessageReceived(remoteMessage)
+    // Custom notification handling
+  }
 
-    override fun onNewToken(token: String) {
-        super.onNewToken(token)
-        // Custom token handling
-    }
+  override fun onNewToken(token: String) {
+    super.onNewToken(token)
+    // Custom token handling
+  }
 }
 ```
 
