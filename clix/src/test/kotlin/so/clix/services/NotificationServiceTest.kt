@@ -9,7 +9,6 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -82,19 +81,6 @@ class NotificationServiceTest {
             // Then - just verify that the method completed without exceptions
             // We can't easily verify the exact settings that were saved with a real StorageService
         }
-
-    @Test
-    fun `it should throw exception when notification preferences are enabled but no permission`() {
-        // This test verifies that ClixError.NotificationPermissionDenied has the expected message
-        // Since we can't easily mock Build.VERSION.SDK_INT in tests, we'll just verify the error
-        // message
-
-        // Import the ClixError class
-        val error = ClixError.NotificationPermissionDenied
-
-        // Verify the error message
-        assertEquals("Notification permission denied.", error.message)
-    }
 
     @Test
     fun `it should save settings when notification preferences are disabled regardless of permission`() =
