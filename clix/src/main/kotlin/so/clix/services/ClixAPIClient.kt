@@ -50,7 +50,7 @@ internal open class ClixAPIClient {
         try {
             val response: HTTPResponse<Res> = httpClient.get<Res>(url, params, headers)
             ClixLogger.debug(
-                "ClixAPIClient GET Response: URL: $url, Status: ${response.statusCode}, Data: ${response.data}",
+                "ClixAPIClient GET Response: URL: $url, Status: ${response.statusCode}, Data: ${response.data}"
             )
             return response.data
         } catch (e: Exception) {
@@ -70,12 +70,12 @@ internal open class ClixAPIClient {
         val url = buildURL(path)
         val headers = getDefaultHeaders()
         ClixLogger.debug(
-            "ClixAPIClient POST Request: URL: $url, Data: $data, Params: $params, Headers: $headers",
+            "ClixAPIClient POST Request: URL: $url, Data: $data, Params: $params, Headers: $headers"
         )
         try {
             val response: HTTPResponse<Res> = httpClient.post<Req, Res>(url, data, params, headers)
             ClixLogger.debug(
-                "ClixAPIClient POST Response: URL: $url, Status: ${response.statusCode}, Data: ${response.data}",
+                "ClixAPIClient POST Response: URL: $url, Status: ${response.statusCode}, Data: ${response.data}"
             )
             return response.data
         } catch (e: Exception) {
@@ -95,12 +95,12 @@ internal open class ClixAPIClient {
         val url = buildURL(path)
         val headers = getDefaultHeaders()
         ClixLogger.debug(
-            "ClixAPIClient PUT Request: URL: $url, Data: $data, Params: $params, Headers: $headers",
+            "ClixAPIClient PUT Request: URL: $url, Data: $data, Params: $params, Headers: $headers"
         )
         try {
             val response: HTTPResponse<Res> = httpClient.put<Req, Res>(url, data, params, headers)
             ClixLogger.debug(
-                "ClixAPIClient PUT Response: URL: $url, Status: ${response.statusCode}, Data: ${response.data}",
+                "ClixAPIClient PUT Response: URL: $url, Status: ${response.statusCode}, Data: ${response.data}"
             )
             return response.data
         } catch (e: Exception) {
@@ -119,12 +119,12 @@ internal open class ClixAPIClient {
         val url = buildURL(path)
         val headers = getDefaultHeaders()
         ClixLogger.debug(
-            "ClixAPIClient DELETE Request: URL: $url, Params: $params, Headers: $headers",
+            "ClixAPIClient DELETE Request: URL: $url, Params: $params, Headers: $headers"
         )
         try {
             val response: HTTPResponse<Res> = httpClient.delete<Res>(url, params, headers)
             ClixLogger.debug(
-                "ClixAPIClient DELETE Response: URL: $url, Status: ${response.statusCode}, Data: ${response.data}",
+                "ClixAPIClient DELETE Response: URL: $url, Status: ${response.statusCode}, Data: ${response.data}"
             )
             return response.data
         } catch (e: Exception) {
