@@ -197,7 +197,8 @@ class ClixUserPropertyTest {
         val containsTimezone =
             property.valueString
                 ?.takeIf { it.isNotBlank() }
-                ?.let { it.contains("+") || it.contains("-") } ?: false
+                ?.let { it.contains("+") || it.contains("-") }
+                ?: false
         assertEquals(true, containsTimezone)
     }
 }
