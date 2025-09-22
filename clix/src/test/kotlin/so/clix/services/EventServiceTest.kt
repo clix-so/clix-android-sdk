@@ -61,11 +61,11 @@ class EventServiceTest {
                         }
                     }
 
-                val eventProperty =
-                    EventProperty(messageId = messageId, customProperties = customProperty)
+                val eventProperties =
+                    EventProperties(messageId = messageId, customProperties = customProperty)
 
                 eventAPIService.trackEvents(
-                    listOf(EventForRequest("test-device-id", name, eventProperty))
+                    listOf(EventForRequest("test-device-id", name, eventProperties))
                 )
             }
     }
@@ -84,7 +84,7 @@ class EventServiceTest {
         coVerify(exactly = 1) { eventAPIService.trackEvents(capture(eventSlot)) }
         val capturedEvent = eventSlot.captured.first()
         assert(capturedEvent.name == eventName)
-        assert(capturedEvent.eventProperty.customProperties.isEmpty())
+        assert(capturedEvent.properties.customProperties.isEmpty())
     }
 
     @Test
@@ -102,8 +102,8 @@ class EventServiceTest {
         coVerify(exactly = 1) { eventAPIService.trackEvents(capture(eventSlot)) }
         val capturedEvent = eventSlot.captured.first()
         assert(capturedEvent.name == eventName)
-        assert(capturedEvent.eventProperty.customProperties["key1"] == JsonPrimitive("value1"))
-        assert(capturedEvent.eventProperty.customProperties["key2"] == JsonPrimitive(123))
+        assert(capturedEvent.properties.customProperties["key1"] == JsonPrimitive("value1"))
+        assert(capturedEvent.properties.customProperties["key2"] == JsonPrimitive(123))
     }
 
     @Test
@@ -121,9 +121,9 @@ class EventServiceTest {
         coVerify(exactly = 1) { eventAPIService.trackEvents(capture(eventSlot)) }
         val capturedEvent = eventSlot.captured.first()
         assert(capturedEvent.name == eventName)
-        assert(capturedEvent.eventProperty.customProperties.containsKey("key1"))
+        assert(capturedEvent.properties.customProperties.containsKey("key1"))
         // Null values are converted to JsonPrimitive("null")
-        assert(capturedEvent.eventProperty.customProperties["key1"] == JsonPrimitive("null"))
+        assert(capturedEvent.properties.customProperties["key1"] == JsonPrimitive("null"))
     }
 
     @Test
@@ -141,6 +141,6 @@ class EventServiceTest {
         coVerify(exactly = 1) { eventAPIService.trackEvents(capture(eventSlot)) }
         val capturedEvent = eventSlot.captured.first()
         assert(capturedEvent.name == eventName)
-        assert(capturedEvent.eventProperty.customProperties.isEmpty())
+        assert(capturedEvent.properties.customProperties.isEmpty())
     }
 }
