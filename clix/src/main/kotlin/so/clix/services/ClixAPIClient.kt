@@ -4,6 +4,7 @@ import ClixError
 import java.net.MalformedURLException
 import java.net.URL
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonNamingStrategy
 import so.clix.core.Clix
 import so.clix.utils.http.HTTPClient
 import so.clix.utils.http.HTTPResponse
@@ -14,6 +15,7 @@ internal open class ClixAPIClient {
     internal val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
+        namingStrategy = JsonNamingStrategy.SnakeCase
     }
 
     private val httpClient: HTTPClient = HTTPClient.createInstance(json)
