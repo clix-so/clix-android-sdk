@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-09-22
+
+### Added
+
+- **User Properties**
+
+  - Added datetime property type support with automatic ISO8601 formatting
+
+- **Event Tracking**
+  - Added user journey context to event properties for statistics
+
+### Fixed
+
+- **Core SDK**
+  - Apply naming strategy to ClixAPIClient to remove log errors
+
 ## [1.0.1] - 2025-08-28
 
 ### Fixed
@@ -16,17 +32,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Core SDK**
+
   - ClixConfig-based initialization with projectId, apiKey, endpoint configuration
   - Coroutine-based asynchronous operations
   - Thread-safe singleton implementation with automatic initialization handling
   - Kotlin 1.9.25 with full coroutines support
 
 - **User Management**
+
   - User identification: `setUserId()`
   - User properties: `setUserProperty()`, `setUserProperties()`
   - Persistent storage of user data using SharedPreferences
 
 - **Push Notifications**
+
   - Firebase Cloud Messaging (FCM) integration
   - ClixMessagingService for automated push token management
   - Rich notification support with images

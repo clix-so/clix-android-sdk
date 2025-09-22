@@ -18,7 +18,7 @@ Add the dependency to your app's `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("so.clix:clix-android-sdk:1.0.1")
+    implementation("so.clix:clix-android-sdk:1.1.0")
 }
 ```
 
@@ -127,7 +127,9 @@ Clix SDK supports push notification integration via `ClixMessagingService`.
 This approach automates push notification handling, device token management, and event tracking.
 
 1. **Enable Push Notifications in your project**
-  - Configure Firebase Cloud Messaging and add `google-services.json` to your app module.
+
+- Configure Firebase Cloud Messaging and add `google-services.json` to your app module.
+
 2. **Inherit from ClixMessagingService in your service**
 
 ```kotlin
