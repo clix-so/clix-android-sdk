@@ -33,6 +33,11 @@ internal data class NotificationSettings(
     val lastUpdated: Long = System.currentTimeMillis(),
 )
 
+internal enum class NotificationEvent {
+    PUSH_NOTIFICATION_RECEIVED,
+    PUSH_NOTIFICATION_TAPPED,
+}
+
 internal class NotificationService(
     private val context: Context,
     private val storageService: StorageService,
@@ -146,7 +151,7 @@ internal class NotificationService(
         userJourneyNodeId: String?,
     ) {
         eventService.trackEvent(
-            name = "PUSH_NOTIFICATION_RECEIVED",
+            name = NotificationEvent.PUSH_NOTIFICATION_RECEIVED.name,
             messageId = messageId,
             userJourneyId = userJourneyId,
             userJourneyNodeId = userJourneyNodeId,
@@ -159,7 +164,7 @@ internal class NotificationService(
         userJourneyNodeId: String? = null,
     ) {
         eventService.trackEvent(
-            name = "PUSH_NOTIFICATION_TAPPED",
+            name = NotificationEvent.PUSH_NOTIFICATION_TAPPED.name,
             messageId = messageId,
             userJourneyId = userJourneyId,
             userJourneyNodeId = userJourneyNodeId,
