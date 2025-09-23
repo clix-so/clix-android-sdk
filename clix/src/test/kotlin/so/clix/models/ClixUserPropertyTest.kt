@@ -195,7 +195,8 @@ class ClixUserPropertyTest {
         assertEquals(ClixUserProperty.UserPropertyType.USER_PROPERTY_TYPE_DATETIME, property.type)
         // Should contain timezone offset (+ or -)
         val containsTimezone =
-            property.valueString.contains("+") || property.valueString.contains("-")
+            property.valueString?.contains("+") == true ||
+                property.valueString?.contains("-") == true
         assertEquals(true, containsTimezone)
     }
 }

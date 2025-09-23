@@ -14,7 +14,8 @@ import kotlinx.serialization.Serializable
 internal data class ClixUserProperty(
     val name: String,
     val type: UserPropertyType,
-    val valueString: String,
+    val valueString: String? = null,
+    val value: String? = null,
 ) {
     enum class UserPropertyType {
         USER_PROPERTY_TYPE_STRING,
