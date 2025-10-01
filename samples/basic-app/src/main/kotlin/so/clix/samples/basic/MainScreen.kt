@@ -56,12 +56,33 @@ fun MainScreen() {
     var userPropertyKeyInput by remember { mutableStateOf(TextFieldValue("")) }
     var userPropertyValueInput by remember { mutableStateOf(TextFieldValue("")) }
     var eventNameInput by remember { mutableStateOf(TextFieldValue("")) }
-    var eventParamsInput by remember { mutableStateOf(TextFieldValue("{}")) }
+    var eventParamsInput by remember {
+        mutableStateOf(
+            TextFieldValue(
+                """
+                {
+                  "key": "value"
+                }
+                """
+                    .trimIndent()
+            )
+        )
+    }
 
     val projectIdText = "N/A"
     val apiKeyText = "N/A"
-    val deviceIdText = try { Clix.getDeviceId() } catch (e: Exception) { "N/A" }
-    val fcmTokenText = try { Clix.getToken() ?: "N/A" } catch (e: Exception) { "N/A" }
+    val deviceIdText =
+        try {
+            Clix.getDeviceId()
+        } catch (e: Exception) {
+            "N/A"
+        }
+    val fcmTokenText =
+        try {
+            Clix.getToken() ?: "N/A"
+        } catch (e: Exception) {
+            "N/A"
+        }
     val currentUserIdText = BasicApplication.userPreferences.getUserId() ?: "N/A"
 
     Column(
@@ -89,17 +110,11 @@ fun MainScreen() {
                 InfoTextRow(label = stringResource(R.string.api_key), value = apiKeyText)
                 InfoTextRow(label = stringResource(R.string.device_id), value = deviceIdText)
                 InfoTextRow(label = stringResource(R.string.fcm_token), value = fcmTokenText)
-                InfoTextRow(
-                    label = "User ID",
-                    value = currentUserIdText,
-                    lastItem = true,
-                )
+                InfoTextRow(label = "User ID", value = currentUserIdText, lastItem = true)
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
                     OutlinedTextField(
                         value = userIdInput,
                         onValueChange = { userIdInput = it },
@@ -165,7 +180,8 @@ fun MainScreen() {
                         ) {
                             Text(
                                 stringResource(R.string.submit),
-                                style = MaterialTheme.typography.labelLarge.copy(color = Color.Black),
+                                style =
+                                    MaterialTheme.typography.labelLarge.copy(color = Color.Black),
                             )
                         }
 
@@ -198,7 +214,8 @@ fun MainScreen() {
                         ) {
                             Text(
                                 "Remove",
-                                style = MaterialTheme.typography.labelLarge.copy(color = Color.White),
+                                style =
+                                    MaterialTheme.typography.labelLarge.copy(color = Color.White),
                             )
                         }
                     }
@@ -210,7 +227,7 @@ fun MainScreen() {
                     Text(
                         text = "User Property",
                         style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(bottom = 16.dp)
+                        modifier = Modifier.padding(bottom = 16.dp),
                     )
 
                     OutlinedTextField(
@@ -219,17 +236,20 @@ fun MainScreen() {
                         label = { Text("Property Key") },
                         modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
                         shape = RoundedCornerShape(12.dp),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            focusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            cursorColor = MaterialTheme.colorScheme.primary,
-                        ),
+                        colors =
+                            TextFieldDefaults.colors(
+                                focusedContainerColor =
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                unfocusedContainerColor =
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                focusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                cursorColor = MaterialTheme.colorScheme.primary,
+                            ),
                         maxLines = 1,
                     )
 
@@ -241,17 +261,20 @@ fun MainScreen() {
                         label = { Text("Property Value") },
                         modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
                         shape = RoundedCornerShape(12.dp),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            focusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            cursorColor = MaterialTheme.colorScheme.primary,
-                        ),
+                        colors =
+                            TextFieldDefaults.colors(
+                                focusedContainerColor =
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                unfocusedContainerColor =
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                focusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                cursorColor = MaterialTheme.colorScheme.primary,
+                            ),
                         maxLines = 1,
                     )
 
@@ -265,22 +288,34 @@ fun MainScreen() {
                             if (key.isNotBlank() && value.isNotBlank()) {
                                 coroutineScope.launch {
                                     Clix.setUserProperty(key, value)
-                                    Toast.makeText(context, "User property set: $key = $value", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(
+                                            context,
+                                            "User property set: $key = $value",
+                                            Toast.LENGTH_SHORT,
+                                        )
+                                        .show()
                                 }
                             } else {
-                                Toast.makeText(context, "Please enter both key and value", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                        context,
+                                        "Please enter both key and value",
+                                        Toast.LENGTH_SHORT,
+                                    )
+                                    .show()
                             }
                         },
                         modifier = Modifier.align(Alignment.End).heightIn(min = 56.dp),
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFEBEBF5).copy(alpha = 0.9f),
-                            contentColor = Color.Black,
-                        ),
-                        elevation = ButtonDefaults.buttonElevation(
-                            defaultElevation = 0.dp,
-                            pressedElevation = 0.dp,
-                        ),
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFEBEBF5).copy(alpha = 0.9f),
+                                contentColor = Color.Black,
+                            ),
+                        elevation =
+                            ButtonDefaults.buttonElevation(
+                                defaultElevation = 0.dp,
+                                pressedElevation = 0.dp,
+                            ),
                     ) {
                         Text(
                             "Submit",
@@ -295,7 +330,7 @@ fun MainScreen() {
                     Text(
                         text = "Track Event",
                         style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(bottom = 16.dp)
+                        modifier = Modifier.padding(bottom = 16.dp),
                     )
 
                     OutlinedTextField(
@@ -304,17 +339,20 @@ fun MainScreen() {
                         label = { Text("Event Name") },
                         modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
                         shape = RoundedCornerShape(12.dp),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            focusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            cursorColor = MaterialTheme.colorScheme.primary,
-                        ),
+                        colors =
+                            TextFieldDefaults.colors(
+                                focusedContainerColor =
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                unfocusedContainerColor =
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                focusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                cursorColor = MaterialTheme.colorScheme.primary,
+                            ),
                         maxLines = 1,
                     )
 
@@ -324,20 +362,24 @@ fun MainScreen() {
                         value = eventParamsInput,
                         onValueChange = { eventParamsInput = it },
                         label = { Text("Event Parameters (JSON)") },
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 160.dp),
                         shape = RoundedCornerShape(12.dp),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            focusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            cursorColor = MaterialTheme.colorScheme.primary,
-                        ),
-                        maxLines = 5,
+                        colors =
+                            TextFieldDefaults.colors(
+                                focusedContainerColor =
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                unfocusedContainerColor =
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                focusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                cursorColor = MaterialTheme.colorScheme.primary,
+                            ),
+                        minLines = 6,
+                        maxLines = 12,
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -349,40 +391,58 @@ fun MainScreen() {
 
                             if (eventName.isNotBlank()) {
                                 try {
-                                    val jsonParams = if (eventParams.isNotBlank() && eventParams != "{}") {
-                                        val jsonObject = JSONObject(eventParams)
-                                        val map = mutableMapOf<String, Any?>()
-                                        val keys = jsonObject.keys()
-                                        while (keys.hasNext()) {
-                                            val key = keys.next()
-                                            map[key] = jsonObject.get(key)
+                                    val jsonParams =
+                                        if (eventParams.isNotBlank() && eventParams != "{}") {
+                                            val jsonObject = JSONObject(eventParams)
+                                            val map = mutableMapOf<String, Any?>()
+                                            val keys = jsonObject.keys()
+                                            while (keys.hasNext()) {
+                                                val key = keys.next()
+                                                map[key] = jsonObject.get(key)
+                                            }
+                                            map
+                                        } else {
+                                            emptyMap<String, Any?>()
                                         }
-                                        map
-                                    } else {
-                                        emptyMap<String, Any?>()
-                                    }
 
                                     coroutineScope.launch {
                                         Clix.trackEvent(eventName, jsonParams)
-                                        Toast.makeText(context, "Event tracked: $eventName", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                                context,
+                                                "Event tracked: $eventName",
+                                                Toast.LENGTH_SHORT,
+                                            )
+                                            .show()
                                     }
                                 } catch (e: Exception) {
-                                    Toast.makeText(context, "Invalid JSON format", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(
+                                            context,
+                                            "Invalid JSON format",
+                                            Toast.LENGTH_SHORT,
+                                        )
+                                        .show()
                                 }
                             } else {
-                                Toast.makeText(context, "Please enter an event name", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                        context,
+                                        "Please enter an event name",
+                                        Toast.LENGTH_SHORT,
+                                    )
+                                    .show()
                             }
                         },
                         modifier = Modifier.align(Alignment.End).heightIn(min = 56.dp),
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFEBEBF5).copy(alpha = 0.9f),
-                            contentColor = Color.Black,
-                        ),
-                        elevation = ButtonDefaults.buttonElevation(
-                            defaultElevation = 0.dp,
-                            pressedElevation = 0.dp,
-                        ),
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFEBEBF5).copy(alpha = 0.9f),
+                                contentColor = Color.Black,
+                            ),
+                        elevation =
+                            ButtonDefaults.buttonElevation(
+                                defaultElevation = 0.dp,
+                                pressedElevation = 0.dp,
+                            ),
                     ) {
                         Text(
                             "Trigger",
@@ -399,17 +459,10 @@ fun MainScreen() {
 fun InfoTextRow(label: String, value: String, lastItem: Boolean = false) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(bottom = if (lastItem) 0.dp else 12.dp),
-        verticalAlignment = Alignment.Top
+        verticalAlignment = Alignment.Top,
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge,
-        )
+        Text(text = label, style = MaterialTheme.typography.bodyLarge)
         Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodySmall,
-            color = Color.Gray
-        )
+        Text(text = value, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
     }
 }
