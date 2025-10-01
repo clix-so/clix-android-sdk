@@ -25,7 +25,7 @@ internal class EventService {
             properties.mapValues { (_, value) ->
                 when (value) {
                     is Boolean -> JsonPrimitive(value)
-                    is Number -> JsonPrimitive(value)
+                    is Number -> JsonPrimitive(value.toDouble())
                     is String -> JsonPrimitive(value)
                     else ->
                         convertToInstant(value)?.let { instant ->
