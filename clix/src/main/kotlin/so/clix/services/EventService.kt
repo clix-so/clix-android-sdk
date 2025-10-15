@@ -2,6 +2,7 @@ package so.clix.services
 
 import kotlinx.serialization.json.JsonPrimitive
 import so.clix.core.Clix
+import so.clix.utils.ClixDateFormatter
 
 internal class EventService {
     private val eventAPIService = EventAPIService()
@@ -17,9 +18,11 @@ internal class EventService {
             properties.mapValues { (_, value) ->
                 when (value) {
                     is Boolean -> JsonPrimitive(value)
-                    is Number -> JsonPrimitive(value)
+                    is Number -> JsonPrimitive(value.toDouble())
                     is String -> JsonPrimitive(value)
-                    else -> JsonPrimitive(value?.toString())
+                    else ->
+                        ClixDateFormatter.format(value)?.let { JsonPrimitive(it) }
+                            ?: JsonPrimitive(value?.toString())
                 }
             }
 

@@ -92,10 +92,12 @@ Clix.removeUserId()
 ```kotlin
 // Track an event with properties
 Clix.trackEvent(
-  "button_clicked",
+  "signup_completed",
   mapOf(
-    "button_id" to "login_button",
-    "screen" to "login"
+    "method" to "email",
+    "discount_applied" to true,
+    "trial_days" to 14,
+    "completed_at" to Instant.now(),
   )
 )
 ```
