@@ -55,4 +55,19 @@ internal class DeviceService(private val storageService: StorageService) {
             ClixLogger.error("Failed to register device: ${e.message}", e)
         }
     }
+
+    suspend fun upsertIsPushPermissionGranted(isGranted: Boolean) {
+        try {
+            val device = Clix.environment.getDevice().copy(isPushPermissionGranted = isGranted)
+            Clix.environment.setDevice(device)
+            deviceApiService.upsertDevice(device)
+            ClixLogger.debug("Updated push permission granted status: $isGranted")
+        } catch (e: IOException) {
+            ClixLogger.error("Network error during updating push permission status", e)
+        } catch (e: SerializationException) {
+            ClixLogger.error("JSON parsing error during updating push permission status", e)
+        } catch (e: ClixError.InvalidResponse) {
+            ClixLogger.error("Failed to update push permission status: ${e.message}", e)
+        }
+    }
 }

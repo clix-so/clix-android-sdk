@@ -198,4 +198,21 @@ object Clix {
             return null
         }
     }
+
+    /**
+     * Sets the push permission granted status.
+     *
+     * This method should be called after the user grants or denies push notification permission. It
+     * updates the device's push permission status on the server.
+     *
+     * @param isGranted Whether push notification permission is granted.
+     */
+    @JvmStatic
+    suspend fun setPushPermissionGranted(isGranted: Boolean) {
+        try {
+            deviceService.upsertIsPushPermissionGranted(isGranted)
+        } catch (e: Exception) {
+            ClixLogger.error("Failed to set push permission granted", e)
+        }
+    }
 }
