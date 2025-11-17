@@ -400,8 +400,6 @@ for d in $EXCLUDE_DIRS; do
   exclude_pred="$exclude_pred -path '*/$d' -prune -o"
 done
 
- # Truncate output and write header AFTER reading existing LLMS map
-
 # Temp workspace (no associative arrays in macOS Bash 3.2)
 SECTION_TMP_DIR="$(mktemp -d)"
 trap '[[ -d "$SECTION_TMP_DIR" ]] && rm -rf "$SECTION_TMP_DIR"' EXIT
