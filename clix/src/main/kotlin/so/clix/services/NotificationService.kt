@@ -46,7 +46,7 @@ internal class NotificationService(
     private val notificationManager = NotificationManagerCompat.from(context)
     private val channelId = "clix_notification_channel"
     private val settingsKey = "clix_notification_settings"
-    private val lastNotificationKey = "clix_last_notification"
+    private val lastReceivedMessageIdKey = "clix_last_received_message_id"
 
     init {
         createNotificationChannel()
@@ -173,6 +173,15 @@ internal class NotificationService(
 
     suspend fun handleNotificationReceived(payload: ClixPushNotificationPayload) {
         try {
+            val shouldTrack = recordReceivedMessageId(payload.messageId)
+            if (!shouldTrack) {
+                val eventName = NotificationEvent.PUSH_NOTIFICATION_RECEIVED.name
+                ClixLogger.debug(
+                    "Skipping duplicate $eventName for messageId: ${payload.messageId}",
+                )
+                return
+            }
+
             if (
                 ActivityCompat.checkSelfPermission(
                     context,
@@ -180,12 +189,17 @@ internal class NotificationService(
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
                 showNotification(payload)
-                trackPushNotificationReceivedEvent(
-                    payload.messageId,
-                    payload.userJourneyId,
-                    payload.userJourneyNodeId,
-                )
-                ClixLogger.debug("Message received, notification sent to Clix SDK")
+                try {
+                    trackPushNotificationReceivedEvent(
+                        payload.messageId,
+                        payload.userJourneyId,
+                        payload.userJourneyNodeId,
+                    )
+                    ClixLogger.debug("Message received, notification sent to Clix SDK")
+                } catch (e: Exception) {
+                    recoverReceivedMessageId(payload.messageId)
+                    throw e
+                }
             } else {
                 ClixLogger.warn("Notification permission not granted, cannot show notification")
             }
@@ -239,9 +253,25 @@ internal class NotificationService(
         }
     }
 
+    private fun recordReceivedMessageId(messageId: String): Boolean {
+        val previous = storageService.get<String>(lastReceivedMessageIdKey)
+        if (previous == messageId) {
+            return false
+        }
+        storageService.set(lastReceivedMessageIdKey, messageId)
+        return true
+    }
+
+    private fun recoverReceivedMessageId(messageId: String) {
+        val previous = storageService.get<String>(lastReceivedMessageIdKey)
+        if (previous == messageId) {
+            storageService.remove(lastReceivedMessageIdKey)
+        }
+    }
+
     fun reset() {
         storageService.remove(settingsKey)
-        storageService.remove(lastNotificationKey)
+        storageService.remove(lastReceivedMessageIdKey)
         notificationManager.cancelAll()
     }
 
