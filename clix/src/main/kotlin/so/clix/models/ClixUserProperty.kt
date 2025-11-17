@@ -7,7 +7,6 @@ import so.clix.utils.ClixDateFormatter
 internal data class ClixUserProperty(
     val name: String,
     val type: UserPropertyType,
-    val valueString: String? = null,
     val value: String? = null,
 ) {
     enum class UserPropertyType {

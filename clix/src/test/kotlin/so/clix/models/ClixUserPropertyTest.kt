@@ -6,8 +6,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Calendar
-import java.util.Date
+import java.util.*
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -25,7 +24,7 @@ class ClixUserPropertyTest {
         // Then
         assertEquals(name, property.name)
         assertEquals(ClixUserProperty.UserPropertyType.USER_PROPERTY_TYPE_STRING, property.type)
-        assertEquals(value, property.valueString)
+        assertEquals(value, property.value)
     }
 
     @Test
@@ -40,7 +39,7 @@ class ClixUserPropertyTest {
         // Then
         assertEquals(name, property.name)
         assertEquals(ClixUserProperty.UserPropertyType.USER_PROPERTY_TYPE_BOOLEAN, property.type)
-        assertEquals("true", property.valueString)
+        assertEquals("true", property.value)
     }
 
     @Test
@@ -55,7 +54,7 @@ class ClixUserPropertyTest {
         // Then
         assertEquals(name, property.name)
         assertEquals(ClixUserProperty.UserPropertyType.USER_PROPERTY_TYPE_NUMBER, property.type)
-        assertEquals("123", property.valueString)
+        assertEquals("123", property.value)
     }
 
     @Test
@@ -73,7 +72,7 @@ class ClixUserPropertyTest {
         assertEquals(ClixUserProperty.UserPropertyType.USER_PROPERTY_TYPE_DATETIME, property.type)
         val expected =
             instant.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-        assertEquals(expected, property.valueString)
+        assertEquals(expected, property.value)
     }
 
     @Test
@@ -91,7 +90,7 @@ class ClixUserPropertyTest {
         assertEquals(ClixUserProperty.UserPropertyType.USER_PROPERTY_TYPE_DATETIME, property.type)
         val expected =
             instant.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-        assertEquals(expected, property.valueString)
+        assertEquals(expected, property.value)
     }
 
     @Test
@@ -108,7 +107,7 @@ class ClixUserPropertyTest {
         assertEquals(ClixUserProperty.UserPropertyType.USER_PROPERTY_TYPE_DATETIME, property.type)
         val expected =
             value.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-        assertEquals(expected, property.valueString)
+        assertEquals(expected, property.value)
     }
 
     @Test
@@ -128,7 +127,7 @@ class ClixUserPropertyTest {
                 .toInstant()
                 .atZone(ZoneId.systemDefault())
                 .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-        assertEquals(expected, property.valueString)
+        assertEquals(expected, property.value)
     }
 
     @Test
@@ -145,7 +144,7 @@ class ClixUserPropertyTest {
         assertEquals(ClixUserProperty.UserPropertyType.USER_PROPERTY_TYPE_DATETIME, property.type)
         val expected =
             value.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-        assertEquals(expected, property.valueString)
+        assertEquals(expected, property.value)
     }
 
     @Test
@@ -164,7 +163,7 @@ class ClixUserPropertyTest {
             value
                 .atStartOfDay(ZoneId.systemDefault())
                 .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-        assertEquals(expected, property.valueString)
+        assertEquals(expected, property.value)
     }
 
     @Test
@@ -179,7 +178,7 @@ class ClixUserPropertyTest {
         // Then
         assertEquals(name, property.name)
         assertEquals(ClixUserProperty.UserPropertyType.USER_PROPERTY_TYPE_STRING, property.type)
-        assertEquals(value.toString(), property.valueString)
+        assertEquals(value.toString(), property.value)
     }
 
     @Test
@@ -195,8 +194,7 @@ class ClixUserPropertyTest {
         assertEquals(ClixUserProperty.UserPropertyType.USER_PROPERTY_TYPE_DATETIME, property.type)
         // Should contain timezone offset (+ or -)
         val containsTimezone =
-            property.valueString?.contains("+") == true ||
-                property.valueString?.contains("-") == true
+            property.value?.contains("+") == true || property.value?.contains("-") == true
         assertEquals(true, containsTimezone)
     }
 }
