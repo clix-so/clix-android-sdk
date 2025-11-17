@@ -56,6 +56,7 @@ class NotificationTappedActivity : AppCompatActivity() {
         val landingUrl = intent.getStringExtra("landingUrl")
         val userJourneyId = intent.getStringExtra("userJourneyId")
         val userJourneyNodeId = intent.getStringExtra("userJourneyNodeId")
+        val autoOpenLandingOnTap = intent.getBooleanExtra("autoOpenLandingOnTap", true)
 
         if (messageId == null) {
             ClixLogger.warn("messageId is null in intent extras")
@@ -71,6 +72,9 @@ class NotificationTappedActivity : AppCompatActivity() {
             )
         }
 
+        if (!autoOpenLandingOnTap) {
+            return
+        }
         try {
             val destinationIntent = createIntentToOpenUrlOrApp(landingUrl)
             ClixLogger.debug("Resolved destinationIntent: $destinationIntent")

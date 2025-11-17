@@ -8,12 +8,16 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import so.clix.core.Clix
 
 class MainActivity : ComponentActivity() {
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean
             ->
-            // Handle permission result if needed
+            // Notify Clix SDK about permission status
+            lifecycleScope.launch { Clix.setPushPermissionGranted(isGranted) }
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,6 +31,7 @@ class MainActivity : ComponentActivity() {
         if (!isTiramisuOrHigher) {
             return
         }
+
         val hasNotificationPermission =
             ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
                 PackageManager.PERMISSION_GRANTED

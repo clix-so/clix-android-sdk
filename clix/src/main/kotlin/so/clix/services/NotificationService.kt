@@ -104,7 +104,10 @@ internal class NotificationService(
         }
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
-    private suspend fun showNotification(payload: ClixPushNotificationPayload) {
+    private suspend fun showNotification(
+        payload: ClixPushNotificationPayload,
+        autoOpenLandingOnTap: Boolean = true,
+    ) {
         val launcherIcon = getLauncherIcon(context)
 
         val intent =
@@ -114,6 +117,7 @@ internal class NotificationService(
                 putExtra("userJourneyId", payload.userJourneyId)
                 putExtra("userJourneyNodeId", payload.userJourneyNodeId)
                 putExtra("landingUrl", payload.landingUrl)
+                putExtra("autoOpenLandingOnTap", autoOpenLandingOnTap)
             }
 
         val pendingIntent =
@@ -171,13 +175,16 @@ internal class NotificationService(
         )
     }
 
-    suspend fun handleNotificationReceived(payload: ClixPushNotificationPayload) {
+    suspend fun handleNotificationReceived(
+        payload: ClixPushNotificationPayload,
+        autoOpenLandingOnTap: Boolean = true,
+    ) {
         try {
             val shouldTrack = recordReceivedMessageId(payload.messageId)
             if (!shouldTrack) {
                 val eventName = NotificationEvent.PUSH_NOTIFICATION_RECEIVED.name
                 ClixLogger.debug(
-                    "Skipping duplicate $eventName for messageId: ${payload.messageId}",
+                    "Skipping duplicate $eventName for messageId: ${payload.messageId}"
                 )
                 return
             }
@@ -188,7 +195,7 @@ internal class NotificationService(
                     Manifest.permission.POST_NOTIFICATIONS,
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
-                showNotification(payload)
+                showNotification(payload, autoOpenLandingOnTap)
                 try {
                     trackPushNotificationReceivedEvent(
                         payload.messageId,

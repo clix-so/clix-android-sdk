@@ -43,7 +43,14 @@ internal class DeviceService(private val storageService: StorageService) {
 
     suspend fun upsertToken(token: String) {
         try {
-            val device = Clix.environment.getDevice().copy(pushToken = token)
+            val currentDevice = Clix.environment.getDevice()
+
+            if (currentDevice.pushToken == token) {
+                ClixLogger.debug("Token already exists, skipping upsert")
+                return
+            }
+
+            val device = currentDevice.copy(pushToken = token)
             Clix.environment.setDevice(device)
             deviceApiService.upsertDevice(device)
             ClixLogger.debug("Registered device token")
@@ -58,7 +65,14 @@ internal class DeviceService(private val storageService: StorageService) {
 
     suspend fun upsertIsPushPermissionGranted(isGranted: Boolean) {
         try {
-            val device = Clix.environment.getDevice().copy(isPushPermissionGranted = isGranted)
+            val currentDevice = Clix.environment.getDevice()
+
+            if (currentDevice.isPushPermissionGranted == isGranted) {
+                ClixLogger.debug("Push permission already exists, skipping upsert")
+                return
+            }
+
+            val device = currentDevice.copy(isPushPermissionGranted = isGranted)
             Clix.environment.setDevice(device)
             deviceApiService.upsertDevice(device)
             ClixLogger.debug("Updated push permission granted status: $isGranted")
