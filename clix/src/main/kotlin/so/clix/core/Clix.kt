@@ -10,6 +10,7 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import so.clix.BuildConfig
+import so.clix.notification.ClixNotification
 import so.clix.services.DeviceService
 import so.clix.services.EventService
 import so.clix.services.NotificationService
@@ -28,6 +29,8 @@ import so.clix.utils.logging.ClixLogger
 object Clix {
     private val COROUTINE_CONTEXT by lazy { SupervisorJob() }
     internal val coroutineScope = CoroutineScope(COROUTINE_CONTEXT)
+
+    @JvmField val Notification = ClixNotification
 
     internal lateinit var environment: ClixEnvironment
 

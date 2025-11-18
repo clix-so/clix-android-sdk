@@ -4,10 +4,10 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.icu.util.TimeZone
 import android.os.Build
-import androidx.core.app.NotificationManagerCompat
 import java.lang.reflect.InvocationTargetException
 import kotlinx.serialization.Serializable
 import so.clix.models.ClixDevice
+import so.clix.services.NotificationService
 import so.clix.utils.logging.ClixLogger
 
 @Serializable
@@ -90,7 +90,7 @@ private constructor( // Primary constructor for serialization
         }
 
         fun getIsPushPermissionGranted(context: Context): Boolean {
-            return NotificationManagerCompat.from(context).areNotificationsEnabled()
+            return NotificationService.hasNotificationPermission(context)
         }
     }
 }

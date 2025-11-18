@@ -1,6 +1,7 @@
 # Clix Android SDK
 
-Clix Android SDK is a powerful tool for managing push notifications and user events in your Android application. It provides a simple and intuitive interface for user engagement and analytics.
+Clix Android SDK is a powerful tool for managing push notifications and user events in your Android application. It
+provides a simple and intuitive interface for user engagement and analytics.
 
 ## Installation
 
@@ -18,7 +19,7 @@ Add the dependency to your app's `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("so.clix:clix-android-sdk:1.2.0")
+  implementation("so.clix:clix-android-sdk:1.3.0")
 }
 ```
 
@@ -174,4 +175,5 @@ See the full release history and changes in the [CHANGELOG.md](CHANGELOG.md) fil
 
 ## Contributing
 
-We welcome contributions! Please read the [CONTRIBUTING.md](CONTRIBUTING.md) guide before submitting issues or pull requests.
+We welcome contributions! Please read the [CONTRIBUTING.md](CONTRIBUTING.md) guide before submitting issues or pull
+requests.

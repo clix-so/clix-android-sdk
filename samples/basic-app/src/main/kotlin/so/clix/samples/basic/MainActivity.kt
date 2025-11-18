@@ -1,42 +1,17 @@
 package so.clix.samples.basic
 
-import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import so.clix.core.Clix
 
 class MainActivity : ComponentActivity() {
-    private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean
-            ->
-            // Notify Clix SDK about permission status
-            lifecycleScope.launch { Clix.setPushPermissionGranted(isGranted) }
-        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent { AppTheme { MainScreen() } }
-        checkAndRequestNotificationPermission()
-    }
 
-    private fun checkAndRequestNotificationPermission() {
-        val isTiramisuOrHigher = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-        if (!isTiramisuOrHigher) {
-            return
-        }
-
-        val hasNotificationPermission =
-            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
-                PackageManager.PERMISSION_GRANTED
-        if (!hasNotificationPermission) {
-            requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
+        // Setup Clix notifications with automatic permission request
+        Clix.Notification.setup(autoRequestPermission = true)
     }
 }

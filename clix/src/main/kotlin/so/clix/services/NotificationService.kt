@@ -12,7 +12,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
 import androidx.annotation.RequiresPermission
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import java.net.ConnectException
@@ -24,6 +23,7 @@ import kotlinx.serialization.Serializable
 import so.clix.R
 import so.clix.models.ClixPushNotificationPayload
 import so.clix.notification.NotificationTappedActivity
+import so.clix.notification.PermissionActivity
 import so.clix.utils.logging.ClixLogger
 
 @Serializable
@@ -189,12 +189,7 @@ internal class NotificationService(
                 return
             }
 
-            if (
-                ActivityCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.POST_NOTIFICATIONS,
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
+            if (hasNotificationPermission(context)) {
                 showNotification(payload, autoOpenLandingOnTap)
                 try {
                     trackPushNotificationReceivedEvent(
@@ -228,7 +223,7 @@ internal class NotificationService(
         }
     }
 
-    suspend fun setNotificationPreferences(
+    fun setNotificationPreferences(
         context: Context,
         enabled: Boolean,
         categories: List<String>? = null,
@@ -246,17 +241,23 @@ internal class NotificationService(
         storageService.set(settingsKey, settings)
     }
 
-    private fun hasNotificationPermission(context: Context): Boolean =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) ==
-                android.content.pm.PackageManager.PERMISSION_GRANTED
-        } else {
-            true
-        }
+    suspend fun requestNotificationPermission(): Boolean {
+        return try {
+            if (hasNotificationPermission(context)) {
+                ClixLogger.debug("Notification permission already granted")
+                return true
+            }
 
-    suspend fun requestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            throw ClixError.NotificationPermissionDenied
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ClixLogger.debug("Requesting notification permission")
+                PermissionActivity.requestPermission(context)
+            } else {
+                ClixLogger.debug("Notification permission granted at install time (Android < 13)")
+                true
+            }
+        } catch (e: Exception) {
+            ClixLogger.error("Failed to request notification permission", e)
+            false
         }
     }
 
@@ -285,5 +286,9 @@ internal class NotificationService(
     companion object {
         private const val CONNECT_TIMEOUT_MS = 1000L
         private const val READ_TIMEOUT_MS = 3000L
+
+        fun hasNotificationPermission(context: Context): Boolean {
+            return NotificationManagerCompat.from(context).areNotificationsEnabled()
+        }
     }
 }

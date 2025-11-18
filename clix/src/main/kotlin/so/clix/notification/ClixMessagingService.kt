@@ -27,20 +27,11 @@ import so.clix.utils.logging.ClixLogger
  * ```
  *
  * Override Points:
- * - [autoRequestAuthorizationOnLaunch]: Whether to request notification authorization automatically
- *   on initialization. Override to delay the permission prompt (e.g., show onboarding first).
  * - [autoOpenLandingOnTap]: Whether the SDK should automatically open landing URLs when a push is
  *   tapped. Override to disable auto-opening and handle routing yourself.
  */
 @OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
 open class ClixMessagingService : FirebaseMessagingService() {
-    /**
-     * Whether to request notification authorization automatically on launch. Override to delay the
-     * permission prompt (e.g., show onboarding first).
-     */
-    open val autoRequestAuthorizationOnLaunch: Boolean
-        get() = false
-
     /**
      * Whether the SDK should automatically open landing URLs when a push is tapped. Override to
      * disable auto-opening and handle routing yourself.
