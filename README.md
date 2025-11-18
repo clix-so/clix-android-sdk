@@ -41,9 +41,9 @@ dependencies {
 You can initialize the SDK in your `Application` class. The `endpoint` and `logLevel` parameters are optional.
 
 ```kotlin
-import so.clix.Clix
-import so.clix.ClixConfig
-import so.clix.ClixLogLevel
+import so.clix.core.Clix
+import so.clix.core.ClixConfig
+import so.clix.utils.logging.ClixLogLevel
 
 class MyApplication : Application() {
   override fun onCreate() {
@@ -123,23 +123,55 @@ Clix.setLogLevel(ClixLogLevel.DEBUG)
 
 ### Push Notification Integration
 
-Clix SDK supports push notification integration via `ClixMessagingService`.
+#### 1. Setup Notification Handling
 
-#### Using ClixMessagingService
+Initialize notification handling in your `Application` or `MainActivity`:
 
-This approach automates push notification handling, device token management, and event tracking.
+```kotlin
+import so.clix.core.Clix
 
-1. **Enable Push Notifications in your project**
+class MyApplication : Application() {
+  override fun onCreate() {
+    super.onCreate()
 
-- Configure Firebase Cloud Messaging and add `google-services.json` to your app module.
+    // Setup with automatic permission request
+    Clix.Notification.setup(autoRequestPermission = true)
+  }
+}
+```
 
-2. **Inherit from ClixMessagingService in your service**
+Or request permission manually:
+
+```kotlin
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+
+class MainActivity : AppCompatActivity() {
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+
+    lifecycleScope.launch {
+      val granted = Clix.Notification.requestNotificationPermission()
+      if (granted) {
+        // Permission granted
+      }
+    }
+  }
+}
+```
+
+#### 2. Create Messaging Service
+
+Inherit from `ClixMessagingService`:
 
 ```kotlin
 import com.google.firebase.messaging.RemoteMessage
-import so.clix.ClixMessagingService
+import so.clix.notification.ClixMessagingService
 
 class MyMessagingService : ClixMessagingService() {
+  // Optional: Control landing URL auto-opening
+  override val autoOpenLandingOnTap: Boolean = true
+
   override fun onMessageReceived(remoteMessage: RemoteMessage) {
     super.onMessageReceived(remoteMessage)
     // Custom notification handling
@@ -152,9 +184,13 @@ class MyMessagingService : ClixMessagingService() {
 }
 ```
 
-- Permission requests, device token registration, and event tracking are handled automatically.
-- You can override: `onMessageReceived`, `onNewToken`.
-- Always call super to retain default SDK behavior.
+**Features:**
+
+- Automatic device token registration and updates
+- Push notification event tracking
+- Duplicate notification prevention
+- Deep linking support
+- Override `autoOpenLandingOnTap` to control landing URL behavior
 
 ## Proguard
 

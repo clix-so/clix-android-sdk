@@ -10,7 +10,6 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import so.clix.BuildConfig
-import so.clix.notification.ClixNotification
 import so.clix.services.DeviceService
 import so.clix.services.EventService
 import so.clix.services.NotificationService

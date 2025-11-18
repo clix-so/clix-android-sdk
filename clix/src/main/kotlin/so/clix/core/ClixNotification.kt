@@ -1,7 +1,6 @@
-package so.clix.notification
+package so.clix.core
 
 import kotlinx.coroutines.launch
-import so.clix.core.Clix
 import so.clix.utils.logging.ClixLogger
 
 /**
