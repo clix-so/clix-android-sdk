@@ -1,36 +1,17 @@
 package so.clix.notification
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toUri
-import kotlinx.coroutines.launch
-import so.clix.core.Clix
+import org.json.JSONObject
+import so.clix.core.ClixNotification
 import so.clix.utils.logging.ClixLogger
 
 /**
- * NotificationTappedActivity handles interactions triggered by notifications.
+ * NotificationTappedActivity is the manifest entry point for notification taps.
  *
- * This activity is primarily responsible for processing notification intents, determining the
- * appropriate action or destination, and handling navigation based on provided data (e.g.,
- * `messageId` and `landingUrl`).
- *
- * Features:
- * - Handles intents received when a notification is tapped.
- * - Extracts and processes data such as `messageId` and `landingUrl` from the intent extras.
- * - Resolves target destinations, such as opening a URL in a browser or launching the app.
- * - Logs debugging information throughout the lifecycle for better traceability.
- *
- * Flow:
- * 1. When the activity is created (`onCreate`) or a new intent is received (`onNewIntent`), it
- *    invokes the `handleIntent` function.
- * 2. The `messageId` is passed to a coroutine for notification handling.
- * 3. Based on the `landingUrl`, an intent is created to either open a browser or the app.
- *
- * Note:
- * - Invalid or missing data in the intent extras is logged for diagnostics.
- * - This activity finishes itself after processing the intent.
+ * It simply parses the intent extras and hands control to [ClixNotification], which handles
+ * tracking, developer callbacks, and optional landing navigation.
  */
 class NotificationTappedActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,6 +38,7 @@ class NotificationTappedActivity : AppCompatActivity() {
         val userJourneyId = intent.getStringExtra("userJourneyId")
         val userJourneyNodeId = intent.getStringExtra("userJourneyNodeId")
         val autoOpenLandingOnTap = intent.getBooleanExtra("autoOpenLandingOnTap", true)
+        val notificationDataJson = intent.getStringExtra(NOTIFICATION_DATA_EXTRA)
 
         if (messageId == null) {
             ClixLogger.warn("messageId is null in intent extras")
@@ -64,53 +46,33 @@ class NotificationTappedActivity : AppCompatActivity() {
         }
         ClixLogger.debug("Extracted messageId: $messageId")
 
-        Clix.coroutineScope.launch {
-            Clix.notificationService.handleNotificationTapped(
-                messageId,
-                userJourneyId,
-                userJourneyNodeId,
-            )
-        }
+        ClixNotification.handleNotificationTapped(
+            context = this,
+            payload =
+                ClixNotification.NotificationTapPayload(
+                    notificationData =
+                        notificationDataJson?.let { deserializeNotificationData(it) } ?: emptyMap(),
+                    messageId = messageId,
+                    userJourneyId = userJourneyId,
+                    userJourneyNodeId = userJourneyNodeId,
+                    landingUrl = landingUrl,
+                    autoOpenFallback = autoOpenLandingOnTap,
+                ),
+        )
+    }
 
-        if (!autoOpenLandingOnTap) {
-            return
-        }
-        try {
-            val destinationIntent = createIntentToOpenUrlOrApp(landingUrl)
-            ClixLogger.debug("Resolved destinationIntent: $destinationIntent")
-            if (destinationIntent != null) {
-                ClixLogger.debug("Starting activity with intent: $destinationIntent")
-                startActivity(destinationIntent)
-            } else {
-                ClixLogger.warn("destinationIntent was null, cannot launch")
-            }
+    private fun deserializeNotificationData(json: String): Map<String, Any?> {
+        return try {
+            val jsonObject = JSONObject(json)
+            buildMap { jsonObject.keys().forEach { key -> put(key, jsonObject.get(key)) } }
         } catch (e: Exception) {
-            ClixLogger.error("Failed to open URL or launch app", e)
+            ClixLogger.error("Failed to deserialize notification data", e)
+            emptyMap()
         }
     }
 
-    private fun createIntentToOpenUrlOrApp(landingUrl: String?): Intent? {
-        val uri =
-            landingUrl
-                ?.trim()
-                ?.takeIf { it.isNotEmpty() }
-                ?.toUri()
-                ?.also { ClixLogger.debug("Parsed landing URL: $it") }
-
-        return if (uri != null) {
-            openURLInBrowserIntent(uri).also { ClixLogger.debug("Created browser intent: $it") }
-        } else {
-            packageManager.getLaunchIntentForPackage(packageName)?.apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                ClixLogger.debug("Created launch intent for package: $this")
-            }
-        }
-    }
-
-    private fun openURLInBrowserIntent(uri: Uri): Intent {
-        return Intent(Intent.ACTION_VIEW, uri).apply {
-            addCategory(Intent.CATEGORY_BROWSABLE)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        }
+    /** Holds intent extra keys used by this activity. */
+    companion object {
+        const val NOTIFICATION_DATA_EXTRA = "clix_notification_data"
     }
 }

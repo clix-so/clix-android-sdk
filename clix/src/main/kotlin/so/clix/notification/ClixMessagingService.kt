@@ -25,20 +25,9 @@ import so.clix.utils.logging.ClixLogger
  *     </intent-filter>
  * </service>
  * ```
- *
- * Override Points:
- * - [autoOpenLandingOnTap]: Whether the SDK should automatically open landing URLs when a push is
- *   tapped. Override to disable auto-opening and handle routing yourself.
  */
 @OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
 open class ClixMessagingService : FirebaseMessagingService() {
-    /**
-     * Whether the SDK should automatically open landing URLs when a push is tapped. Override to
-     * disable auto-opening and handle routing yourself.
-     */
-    open val autoOpenLandingOnTap: Boolean
-        get() = true
-
     private val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
@@ -51,9 +40,12 @@ open class ClixMessagingService : FirebaseMessagingService() {
         message.data.isNotEmpty().let { ClixLogger.debug("Message data payload: ${message.data}") }
         message.notification?.let { ClixLogger.debug("Message notification body: ${it.body}") }
 
+        val notificationData: Map<String, Any?> = message.data.mapValues { it.value }
         val payload =
             try {
-                message.data["clix"]?.let { json.decodeFromString<ClixPushNotificationPayload>(it) }
+                (notificationData["clix"] as? String)?.let {
+                    json.decodeFromString<ClixPushNotificationPayload>(it)
+                }
             } catch (e: Exception) {
                 ClixLogger.error("Failed to parse clix payload", e)
                 null
@@ -65,7 +57,10 @@ open class ClixMessagingService : FirebaseMessagingService() {
         }
 
         Clix.coroutineScope.launch {
-            Clix.notificationService.handleNotificationReceived(payload, autoOpenLandingOnTap)
+            Clix.Notification.handleIncomingPayload(
+                notificationData = notificationData,
+                payload = payload,
+            )
         }
     }
 

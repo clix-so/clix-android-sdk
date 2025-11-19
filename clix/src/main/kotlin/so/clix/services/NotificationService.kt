@@ -20,6 +20,7 @@ import java.net.URL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import org.json.JSONObject
 import so.clix.R
 import so.clix.models.ClixPushNotificationPayload
 import so.clix.notification.NotificationTappedActivity
@@ -103,9 +104,10 @@ internal class NotificationService(
             }
         }
 
-    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+    @RequiresPermission(value = Manifest.permission.POST_NOTIFICATIONS, conditional = true)
     private suspend fun showNotification(
         payload: ClixPushNotificationPayload,
+        notificationData: Map<String, Any?>,
         autoOpenLandingOnTap: Boolean = true,
     ) {
         val launcherIcon = getLauncherIcon(context)
@@ -118,6 +120,9 @@ internal class NotificationService(
                 putExtra("userJourneyNodeId", payload.userJourneyNodeId)
                 putExtra("landingUrl", payload.landingUrl)
                 putExtra("autoOpenLandingOnTap", autoOpenLandingOnTap)
+                notificationData.toJsonString()?.let {
+                    putExtra(NotificationTappedActivity.NOTIFICATION_DATA_EXTRA, it)
+                }
             }
 
         val pendingIntent =
@@ -177,6 +182,7 @@ internal class NotificationService(
 
     suspend fun handleNotificationReceived(
         payload: ClixPushNotificationPayload,
+        notificationData: Map<String, Any?>,
         autoOpenLandingOnTap: Boolean = true,
     ) {
         try {
@@ -190,7 +196,7 @@ internal class NotificationService(
             }
 
             if (hasNotificationPermission(context)) {
-                showNotification(payload, autoOpenLandingOnTap)
+                showNotification(payload, notificationData, autoOpenLandingOnTap)
                 try {
                     trackPushNotificationReceivedEvent(
                         payload.messageId,
@@ -281,6 +287,15 @@ internal class NotificationService(
         storageService.remove(settingsKey)
         storageService.remove(lastReceivedMessageIdKey)
         notificationManager.cancelAll()
+    }
+
+    private fun Map<String, Any?>.toJsonString(): String? {
+        return try {
+            JSONObject(this as Map<*, *>).toString()
+        } catch (e: Exception) {
+            ClixLogger.error("Failed to serialize raw notification data", e)
+            null
+        }
     }
 
     companion object {
