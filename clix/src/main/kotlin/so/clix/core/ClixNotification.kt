@@ -9,7 +9,8 @@ import so.clix.utils.logging.ClixLogger
  * Provides methods for setting up notification handling and requesting notification permissions.
  */
 object ClixNotification {
-    private var isSetupCalled = false
+    @Volatile private var isSetupCalled = false
+    private val setupLock = Any()
 
     /**
      * Setup notification handling with optional auto permission request.
@@ -30,11 +31,13 @@ object ClixNotification {
      *   is false.
      */
     fun setup(autoRequestPermission: Boolean = false) {
-        if (isSetupCalled) {
-            ClixLogger.debug("ClixNotification.setup() already called, skipping")
-            return
+        synchronized(setupLock) {
+            if (isSetupCalled) {
+                ClixLogger.debug("ClixNotification.setup() already called, skipping")
+                return
+            }
+            isSetupCalled = true
         }
-        isSetupCalled = true
 
         ClixLogger.debug("ClixNotification.setup(autoRequestPermission: $autoRequestPermission)")
 
