@@ -250,6 +250,7 @@ Clix.Notification.onNotificationOpened { notificationData ->
 ```
 
 **Payload structure:**
+
 ```json
 {
   "clix": {

@@ -27,24 +27,22 @@ import so.clix.utils.logging.ClixLogger
  */
 @Suppress("TooManyFunctions")
 object Clix {
+    // Public API
     @JvmField val Notification = ClixNotification
 
-    private val COROUTINE_CONTEXT by lazy { SupervisorJob() }
+    // Internal services
+    internal lateinit var environment: ClixEnvironment
+    internal lateinit var storageService: StorageService
+    internal lateinit var deviceService: DeviceService
+    internal lateinit var eventService: EventService
+    internal lateinit var tokenService: TokenService
+    internal lateinit var notificationService: NotificationService
     internal val coroutineScope = CoroutineScope(COROUTINE_CONTEXT)
 
-    internal lateinit var environment: ClixEnvironment
-
-    internal lateinit var storageService: StorageService
-
-    internal lateinit var deviceService: DeviceService
-
-    internal lateinit var eventService: EventService
-
-    internal lateinit var tokenService: TokenService
-
-    internal lateinit var notificationService: NotificationService
-
     internal const val VERSION = BuildConfig.VERSION
+
+    // Private implementation
+    private val COROUTINE_CONTEXT by lazy { SupervisorJob() }
 
     /**
      * Initializes the Clix SDK.

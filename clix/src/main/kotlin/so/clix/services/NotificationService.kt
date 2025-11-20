@@ -305,6 +305,11 @@ internal class NotificationService(
         notificationManager.cancelAll()
     }
 
+    /**
+     * Serializes a map to JSON string. Only supports JSON-compatible primitive types.
+     * Uses org.json.JSONObject for Android compatibility.
+     */
+    @Suppress("TooGenericExceptionCaught")
     private fun Map<String, Any?>.toJsonString(): String? {
         return try {
             JSONObject(this as Map<*, *>).toString()
@@ -315,7 +320,7 @@ internal class NotificationService(
     }
 
     fun getPermissionStatus(): Boolean {
-        return NotificationManagerCompat.from(context).areNotificationsEnabled()
+        return hasNotificationPermission(context)
     }
 
     companion object {

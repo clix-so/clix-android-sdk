@@ -50,6 +50,8 @@ internal class DeviceService(private val storageService: StorageService) {
     }
 
     suspend fun removeUserProperties(names: List<String>) {
+        if (names.isEmpty()) return
+
         try {
             deviceApiService.removeUserProperties(Clix.environment.deviceId, names)
             ClixLogger.debug(message = "Removed user properties: $names")
