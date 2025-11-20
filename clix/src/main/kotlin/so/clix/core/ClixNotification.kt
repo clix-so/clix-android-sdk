@@ -7,6 +7,7 @@ import androidx.core.net.toUri
 import kotlin.jvm.Volatile
 import kotlinx.coroutines.launch
 import so.clix.models.ClixPushNotificationPayload
+import so.clix.models.NotificationContext
 import so.clix.utils.logging.ClixLogger
 
 /**
@@ -158,10 +159,14 @@ object ClixNotification {
         )
     }
 
-    internal fun handleNotificationTapped(context: Context, payload: ClixPushNotificationPayload) {
+    internal fun handleNotificationTapped(
+        context: Context,
+        notificationContext: NotificationContext,
+        payload: ClixPushNotificationPayload,
+    ) {
         openedHandler?.let { handler ->
             try {
-                handler(payload.notificationData)
+                handler(notificationContext.notificationData)
             } catch (e: Exception) {
                 ClixLogger.error("Notification opened handler failed", e)
             }
@@ -179,7 +184,7 @@ object ClixNotification {
             }
         }
 
-        val shouldAutoOpen = autoHandleLandingURL && payload.autoOpenFallback
+        val shouldAutoOpen = autoHandleLandingURL && notificationContext.autoOpenLandingURL
         if (shouldAutoOpen) {
             openLandingURLIfPresent(context, payload.landingUrl)
         } else {

@@ -150,8 +150,8 @@ internal class NotificationService(
         val builder =
             NotificationCompat.Builder(context, channelId)
                 .setSmallIcon(launcherIcon)
-                .setContentTitle(payload.title)
-                .setContentText(payload.body)
+                .setContentTitle(payload.title.orEmpty())
+                .setContentText(payload.body.orEmpty())
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
 

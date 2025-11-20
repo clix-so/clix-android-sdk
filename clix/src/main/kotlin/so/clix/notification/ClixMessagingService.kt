@@ -3,8 +3,6 @@ package so.clix.notification
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonNamingStrategy
 import so.clix.core.Clix
 import so.clix.models.ClixPushNotificationPayload
 import so.clix.utils.logging.ClixLogger
@@ -26,14 +24,7 @@ import so.clix.utils.logging.ClixLogger
  * </service>
  * ```
  */
-@OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
 open class ClixMessagingService : FirebaseMessagingService() {
-    private val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-        namingStrategy = JsonNamingStrategy.SnakeCase
-    }
-
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
         ClixLogger.debug("Message received $message, from: ${message.from}")
@@ -41,15 +32,7 @@ open class ClixMessagingService : FirebaseMessagingService() {
         message.notification?.let { ClixLogger.debug("Message notification body: ${it.body}") }
 
         val notificationData: Map<String, Any?> = message.data.mapValues { it.value }
-        val payload =
-            try {
-                (notificationData["clix"] as? String)?.let {
-                    json.decodeFromString<ClixPushNotificationPayload>(it)
-                }
-            } catch (e: Exception) {
-                ClixLogger.error("Failed to parse clix payload", e)
-                null
-            }
+        val payload = ClixPushNotificationPayload.decode(notificationData)
 
         if (payload == null) {
             ClixLogger.error("No valid clix payload found in message data")

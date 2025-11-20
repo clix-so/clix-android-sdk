@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import org.json.JSONObject
 import so.clix.core.ClixNotification
 import so.clix.models.ClixPushNotificationPayload
+import so.clix.models.NotificationContext
 import so.clix.utils.logging.ClixLogger
 
 /**
@@ -49,17 +50,18 @@ class NotificationTappedActivity : AppCompatActivity() {
 
         ClixNotification.handleNotificationTapped(
             context = this,
+            notificationContext =
+                NotificationContext(
+                    notificationData =
+                        notificationDataJson?.let { deserializeNotificationData(it) } ?: emptyMap(),
+                    autoOpenLandingURL = autoHandleLandingURL,
+                ),
             payload =
                 ClixPushNotificationPayload(
-                    title = "",
-                    body = "",
                     messageId = messageId,
                     userJourneyId = userJourneyId,
                     userJourneyNodeId = userJourneyNodeId,
                     landingUrl = landingUrl,
-                    notificationData =
-                        notificationDataJson?.let { deserializeNotificationData(it) } ?: emptyMap(),
-                    autoOpenFallback = autoHandleLandingURL,
                 ),
         )
     }

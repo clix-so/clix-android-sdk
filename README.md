@@ -172,6 +172,12 @@ class MyApplication : Application() {
 }
 ```
 
+##### About `notificationData`
+
+- The `notificationData` map is the full FCM payload as delivered to the device; it mirrors iOS’s `userInfo` dictionary.
+- Every Clix notification callback (`onMessage`, `onBackgroundMessage`, `onNotificationOpened`) passes this map through untouched, so you can inspect both the serialized `"clix"` block and any custom keys your backend adds.
+- `notificationData["clix"]` holds the Clix metadata JSON, while all other keys represent app-specific data.
+
 Or request permission manually:
 
 ```kotlin
