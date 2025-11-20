@@ -16,10 +16,12 @@ import so.clix.utils.logging.ClixLogger
  * landing routing) so apps no longer need to subclass Firebase services for basic overrides.
  */
 object ClixNotification {
-    @Volatile private var isSetupCalled = false
-    private val setupLock = Any()
+    @Volatile
+    private var isConfigureCalled = false
+    private val configureLock = Any()
 
-    @Volatile private var autoHandleLandingURL: Boolean = true
+    @Volatile
+    private var autoHandleLandingURL: Boolean = true
 
     private var messageHandler: (suspend (Map<String, Any?>) -> Boolean)? = null
     private var openedHandler: ((Map<String, Any?>) -> Unit)? = null
@@ -45,12 +47,12 @@ object ClixNotification {
      *   tapped
      */
     fun configure(autoRequestPermission: Boolean = false, autoHandleLandingURL: Boolean = true) {
-        synchronized(setupLock) {
-            if (isSetupCalled) {
+        synchronized(configureLock) {
+            if (isConfigureCalled) {
                 ClixLogger.debug("ClixNotification.configure() already called, skipping")
                 return
             }
-            isSetupCalled = true
+            isConfigureCalled = true
         }
 
         ClixLogger.debug(
