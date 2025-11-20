@@ -38,7 +38,7 @@ dependencies {
 
 ### Initialization
 
-You can initialize the SDK in your `Application` class. The `endpoint` and `logLevel` parameters are optional.
+Initialize the SDK with a ClixConfig object. The config is required and contains your project settings.
 
 ```kotlin
 import so.clix.core.Clix
@@ -48,19 +48,16 @@ import so.clix.utils.logging.ClixLogLevel
 class MyApplication : Application() {
   override fun onCreate() {
     super.onCreate()
-    lifecycleScope.launch {
-      try {
-        Clix.initialize(
-          ClixConfig(
-            apiKey = "YOUR_API_KEY",
-            endpoint = "https://api.clix.so", // Optional: default is https://api.clix.so
-            logLevel = ClixLogLevel.INFO      // Optional: default is INFO
-          )
-        )
-      } catch (e: Exception) {
-        // Handle initialization failure
-      }
-    }
+
+    Clix.initialize(
+      context = this,
+      config = ClixConfig(
+        projectId = "YOUR_PROJECT_ID",
+        apiKey = "YOUR_API_KEY",
+        endpoint = "https://api.clix.so", // Optional: default is https://api.clix.so
+        logLevel = ClixLogLevel.INFO       // Optional: default is INFO
+      )
+    )
   }
 }
 ```
@@ -68,45 +65,63 @@ class MyApplication : Application() {
 ### User Management
 
 ```kotlin
+import kotlinx.coroutines.launch
+
 // Set user ID
-Clix.setUserId("user123")
+lifecycleScope.launch {
+  Clix.setUserId("user123")
+}
 
 // Set user properties
-Clix.setUserProperties(
-  mapOf(
-    "name" to "John Doe",
-    "email" to "john@example.com",
-    "age" to 25,
-    "premium" to true
+lifecycleScope.launch {
+  Clix.setUserProperty("name", "John Doe")
+  Clix.setUserProperties(
+    mapOf(
+      "age" to 25,
+      "premium" to true
+    )
   )
-)
+}
 
-// Remove a property
-Clix.removeUserProperty("name")
+// Remove user properties
+lifecycleScope.launch {
+  Clix.removeUserProperty("name")
+  Clix.removeUserProperties(listOf("age", "premium"))
+}
 
 // Remove user ID
-Clix.removeUserId()
+lifecycleScope.launch {
+  Clix.removeUserId()
+}
 ```
 
 ### Event Tracking
 
 ```kotlin
+import kotlinx.coroutines.launch
+
 // Track an event with properties
-Clix.trackEvent(
-  "signup_completed",
-  mapOf(
-    "method" to "email",
-    "discount_applied" to true,
-    "trial_days" to 14,
-    "completed_at" to Instant.now(),
+lifecycleScope.launch {
+  Clix.trackEvent(
+    "signup_completed",
+    mapOf(
+      "method" to "email",
+      "discount_applied" to true,
+      "trial_days" to 14,
+      "completed_at" to Instant.now(),
+    )
   )
-)
+}
 ```
 
-### Reset SDK State
+### Device Information
 
 ```kotlin
-Clix.reset()
+// Get device ID
+val deviceId = Clix.getDeviceId()
+
+// Get push token
+val pushToken = Clix.getPushToken()
 ```
 
 ### Logging
@@ -125,7 +140,7 @@ Clix.setLogLevel(ClixLogLevel.DEBUG)
 
 #### 1. Configure Notification Handling
 
-Initialize notification handling in your `Application` or `MainActivity`:
+Initialize notification handling in your `Application` class:
 
 ```kotlin
 import so.clix.core.Clix
@@ -139,6 +154,20 @@ class MyApplication : Application() {
       autoRequestPermission = true,
       autoHandleLandingURL = true
     )
+
+    // Optional: customize foreground presentation and tap handling
+    Clix.Notification.onMessage { notificationData ->
+      // Return true to display the notification, false to suppress it
+      true
+    }
+
+    Clix.Notification.onNotificationOpened { notificationData ->
+      // Custom routing (called when user taps notification)
+      val landingURL = (notificationData["clix"] as? Map<*, *>)?.get("landing_url") as? String
+      if (landingURL != null) {
+        // Handle custom routing
+      }
+    }
   }
 }
 ```
@@ -191,6 +220,76 @@ class MyMessagingService : ClixMessagingService() {
 - Duplicate notification prevention
 - Deep linking support
 - Use `Clix.Notification.configure(autoHandleLandingURL = false)` to disable automatic landing URL handling
+
+#### Clix.Notification API reference
+
+- `configure(autoRequestPermission:autoHandleLandingURL:)`: Configure push notification handling
+- `onMessage(handler:)`: Register handler for foreground messages
+- `onNotificationOpened(handler:)`: Register handler for notification taps
+- `requestPermission()`: Request notification permissions
+
+## Error Handling
+
+All SDK operations can throw exceptions. Always handle potential errors:
+
+```kotlin
+try {
+  Clix.setUserId("user123")
+} catch (e: Exception) {
+  Log.e("Clix", "Failed to set user ID", e)
+}
+```
+
+## Thread Safety
+
+The SDK is thread-safe and all operations can be called from any thread. Coroutine-based operations will automatically wait for SDK initialization to complete.
+
+## Troubleshooting
+
+### Push Permission Status Not Updating
+
+If you've disabled automatic permission requests (default is `false`), you must manually notify Clix when users grant or deny push permissions.
+
+#### Update Permission Status
+
+After requesting push permissions in your app, call `Clix.setPushPermissionGranted()`:
+
+```kotlin
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+  requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), PERMISSION_REQUEST_CODE)
+}
+
+// In your permission result callback
+override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+  if (requestCode == PERMISSION_REQUEST_CODE) {
+    val granted = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
+
+    // ✅ Notify Clix SDK about permission status
+    Clix.setPushPermissionGranted(granted)
+  }
+}
+```
+
+### Debugging Checklist
+
+If push notifications aren't working, verify:
+
+1. ✅ `google-services.json` is added to your app module
+2. ✅ Firebase Cloud Messaging is properly configured
+3. ✅ `ClixMessagingService` is declared in `AndroidManifest.xml`
+4. ✅ `Clix.setPushPermissionGranted()` is called after requesting permissions (when not using auto-request)
+5. ✅ Testing on a real device or emulator with Google Play Services
+6. ✅ Debug logs show "New token received" message
+
+### Getting Help
+
+If you continue to experience issues:
+
+1. Enable debug logging (`ClixLogLevel.DEBUG`)
+2. Check Logcat for Clix log messages
+3. Verify your device appears in the Clix console Users page
+4. Check if `push_token` field is populated for your device
+5. Create an issue on [GitHub](https://github.com/clix-so/clix-android-sdk/issues) with logs and configuration details
 
 ## Proguard
 

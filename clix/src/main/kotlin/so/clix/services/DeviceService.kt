@@ -26,6 +26,10 @@ internal class DeviceService(private val storageService: StorageService) {
         deviceApiService.setProjectUserId(Clix.environment.deviceId, projectUserId)
     }
 
+    suspend fun removeProjectUserId() {
+        removeUserProperties(listOf("userId"))
+    }
+
     suspend fun updateUserProperties(properties: Map<String, Any>) {
         try {
             val propertiesList =
@@ -38,6 +42,19 @@ internal class DeviceService(private val storageService: StorageService) {
             ClixLogger.error("JSON parsing error during updating user properties", e)
         } catch (e: ClixError.InvalidResponse) {
             ClixLogger.error("Failed to set user properties: ${e.message}", e)
+        }
+    }
+
+    suspend fun removeUserProperties(names: List<String>) {
+        try {
+            deviceApiService.removeUserProperties(Clix.environment.deviceId, names)
+            ClixLogger.debug(message = "Removed user properties: $names")
+        } catch (e: IOException) {
+            ClixLogger.error("Network error during removing user properties", e)
+        } catch (e: SerializationException) {
+            ClixLogger.error("JSON parsing error during removing user properties", e)
+        } catch (e: ClixError.InvalidResponse) {
+            ClixLogger.error("Failed to remove user properties: ${e.message}", e)
         }
     }
 

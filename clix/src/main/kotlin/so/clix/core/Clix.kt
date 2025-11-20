@@ -25,6 +25,7 @@ import so.clix.utils.logging.ClixLogger
  * All public methods include exception handling to prevent crashes in client applications.
  * Exceptions are logged using ClixLogger.
  */
+@Suppress("TooManyFunctions")
 object Clix {
     private val COROUTINE_CONTEXT by lazy { SupervisorJob() }
     internal val coroutineScope = CoroutineScope(COROUTINE_CONTEXT)
@@ -112,6 +113,16 @@ object Clix {
         }
     }
 
+    /** Removes the user ID for the current user. */
+    @JvmStatic
+    suspend fun removeUserId() {
+        try {
+            deviceService.removeProjectUserId()
+        } catch (e: Exception) {
+            ClixLogger.error("Failed to remove user ID", e)
+        }
+    }
+
     /**
      * Sets a single user property.
      *
@@ -138,6 +149,34 @@ object Clix {
             deviceService.updateUserProperties(properties)
         } catch (e: Exception) {
             ClixLogger.error("Failed to set user properties", e)
+        }
+    }
+
+    /**
+     * Removes a single user property.
+     *
+     * @param name The property name to remove.
+     */
+    @JvmStatic
+    suspend fun removeUserProperty(name: String) {
+        try {
+            deviceService.removeUserProperties(listOf(name))
+        } catch (e: Exception) {
+            ClixLogger.error("Failed to remove user property: $name", e)
+        }
+    }
+
+    /**
+     * Removes multiple user properties.
+     *
+     * @param names The list of property names to remove.
+     */
+    @JvmStatic
+    suspend fun removeUserProperties(names: List<String>) {
+        try {
+            deviceService.removeUserProperties(names)
+        } catch (e: Exception) {
+            ClixLogger.error("Failed to remove user properties", e)
         }
     }
 
@@ -187,16 +226,16 @@ object Clix {
     }
 
     /**
-     * Gets the current token for the device.
+     * Gets the current push token for the device.
      *
-     * @return The token as a String, or null if no token is available.
+     * @return The push token as a String, or null if no token is available.
      */
     @JvmStatic
-    fun getToken(): String? {
+    fun getPushToken(): String? {
         try {
             return tokenService.getCurrentToken()
         } catch (e: Exception) {
-            ClixLogger.error("Failed to get token", e)
+            ClixLogger.error("Failed to get push token", e)
             return null
         }
     }
