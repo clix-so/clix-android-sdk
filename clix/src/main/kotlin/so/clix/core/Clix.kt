@@ -30,6 +30,9 @@ object Clix {
     // Public API
     @JvmField val Notification = ClixNotification
 
+    // Private implementation
+    private val COROUTINE_CONTEXT by lazy { SupervisorJob() }
+
     // Internal services
     internal lateinit var environment: ClixEnvironment
     internal lateinit var storageService: StorageService
@@ -40,9 +43,6 @@ object Clix {
     internal val coroutineScope = CoroutineScope(COROUTINE_CONTEXT)
 
     internal const val VERSION = BuildConfig.VERSION
-
-    // Private implementation
-    private val COROUTINE_CONTEXT by lazy { SupervisorJob() }
 
     /**
      * Initializes the Clix SDK.

@@ -61,7 +61,9 @@ internal class NotificationService(
         if (oldValue != null) {
             storageService.set(lastReceivedMessageIdKey, oldValue)
             storageService.remove(oldKey)
-            ClixLogger.debug("Migrated notification storage key: $oldKey -> $lastReceivedMessageIdKey")
+            ClixLogger.debug(
+                "Migrated notification storage key: $oldKey -> $lastReceivedMessageIdKey"
+            )
         }
     }
 
@@ -306,8 +308,8 @@ internal class NotificationService(
     }
 
     /**
-     * Serializes a map to JSON string. Only supports JSON-compatible primitive types.
-     * Uses org.json.JSONObject for Android compatibility.
+     * Serializes a map to JSON string. Only supports JSON-compatible primitive types. Uses
+     * org.json.JSONObject for Android compatibility.
      */
     @Suppress("TooGenericExceptionCaught")
     private fun Map<String, Any?>.toJsonString(): String? {

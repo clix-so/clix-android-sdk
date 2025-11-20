@@ -30,10 +30,6 @@ internal class DeviceService(private val storageService: StorageService) {
         removeUserProperties(listOf(USER_ID_PROPERTY_NAME))
     }
 
-    companion object {
-        private const val USER_ID_PROPERTY_NAME = "userId"
-    }
-
     suspend fun updateUserProperties(properties: Map<String, Any>) {
         try {
             val propertiesList =
@@ -106,5 +102,9 @@ internal class DeviceService(private val storageService: StorageService) {
         } catch (e: ClixError.InvalidResponse) {
             ClixLogger.error("Failed to update push permission status: ${e.message}", e)
         }
+    }
+
+    companion object {
+        private const val USER_ID_PROPERTY_NAME = "userId"
     }
 }
