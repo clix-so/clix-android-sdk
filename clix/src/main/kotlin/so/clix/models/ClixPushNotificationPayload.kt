@@ -1,6 +1,7 @@
 package so.clix.models
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 internal data class ClixPushNotificationPayload(
@@ -11,4 +12,6 @@ internal data class ClixPushNotificationPayload(
     val userJourneyNodeId: String? = null,
     val landingUrl: String? = null,
     val imageUrl: String? = null,
+    @Transient val notificationData: Map<String, Any?> = emptyMap(),
+    @Transient val autoOpenFallback: Boolean = true,
 )

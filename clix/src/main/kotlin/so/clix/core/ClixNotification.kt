@@ -27,15 +27,6 @@ object ClixNotification {
 
     @Volatile private var openedHandler: ((Map<String, Any?>) -> Unit)? = null
 
-    internal data class NotificationTapPayload(
-        val notificationData: Map<String, Any?>,
-        val messageId: String,
-        val userJourneyId: String?,
-        val userJourneyNodeId: String?,
-        val landingUrl: String?,
-        val autoOpenFallback: Boolean,
-    )
-
     /**
      * Configure push notification handling with optional settings.
      *
@@ -163,11 +154,11 @@ object ClixNotification {
         Clix.notificationService.handleNotificationReceived(
             payload = payload,
             notificationData = notificationData,
-            autoOpenLandingOnTap = autoHandleLandingURL,
+            autoHandleLandingURL = autoHandleLandingURL,
         )
     }
 
-    internal fun handleNotificationTapped(context: Context, payload: NotificationTapPayload) {
+    internal fun handleNotificationTapped(context: Context, payload: ClixPushNotificationPayload) {
         openedHandler?.let { handler ->
             try {
                 handler(payload.notificationData)

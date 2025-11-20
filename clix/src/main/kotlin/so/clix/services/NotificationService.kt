@@ -122,7 +122,7 @@ internal class NotificationService(
     private suspend fun showNotification(
         payload: ClixPushNotificationPayload,
         notificationData: Map<String, Any?>,
-        autoOpenLandingOnTap: Boolean = true,
+        autoHandleLandingURL: Boolean = true,
     ) {
         val launcherIcon = getLauncherIcon(context)
 
@@ -133,7 +133,7 @@ internal class NotificationService(
                 putExtra("userJourneyId", payload.userJourneyId)
                 putExtra("userJourneyNodeId", payload.userJourneyNodeId)
                 putExtra("landingUrl", payload.landingUrl)
-                putExtra("autoOpenLandingOnTap", autoOpenLandingOnTap)
+                putExtra("autoHandleLandingURL", autoHandleLandingURL)
                 notificationData.toJsonString()?.let {
                     putExtra(NotificationTappedActivity.NOTIFICATION_DATA_EXTRA, it)
                 }
@@ -197,7 +197,7 @@ internal class NotificationService(
     suspend fun handleNotificationReceived(
         payload: ClixPushNotificationPayload,
         notificationData: Map<String, Any?>,
-        autoOpenLandingOnTap: Boolean = true,
+        autoHandleLandingURL: Boolean = true,
     ) {
         try {
             if (hasNotificationPermission(context)) {
@@ -211,7 +211,7 @@ internal class NotificationService(
                 }
 
                 try {
-                    showNotification(payload, notificationData, autoOpenLandingOnTap)
+                    showNotification(payload, notificationData, autoHandleLandingURL)
                     trackPushNotificationReceivedEvent(
                         payload.messageId,
                         payload.userJourneyId,

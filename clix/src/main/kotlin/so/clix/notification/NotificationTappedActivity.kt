@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import org.json.JSONObject
 import so.clix.core.ClixNotification
+import so.clix.models.ClixPushNotificationPayload
 import so.clix.utils.logging.ClixLogger
 
 /**
@@ -37,7 +38,7 @@ class NotificationTappedActivity : AppCompatActivity() {
         val landingUrl = intent.getStringExtra("landingUrl")
         val userJourneyId = intent.getStringExtra("userJourneyId")
         val userJourneyNodeId = intent.getStringExtra("userJourneyNodeId")
-        val autoOpenLandingOnTap = intent.getBooleanExtra("autoOpenLandingOnTap", true)
+        val autoHandleLandingURL = intent.getBooleanExtra("autoHandleLandingURL", true)
         val notificationDataJson = intent.getStringExtra(NOTIFICATION_DATA_EXTRA)
 
         if (messageId == null) {
@@ -49,14 +50,16 @@ class NotificationTappedActivity : AppCompatActivity() {
         ClixNotification.handleNotificationTapped(
             context = this,
             payload =
-                ClixNotification.NotificationTapPayload(
-                    notificationData =
-                        notificationDataJson?.let { deserializeNotificationData(it) } ?: emptyMap(),
+                ClixPushNotificationPayload(
+                    title = "",
+                    body = "",
                     messageId = messageId,
                     userJourneyId = userJourneyId,
                     userJourneyNodeId = userJourneyNodeId,
                     landingUrl = landingUrl,
-                    autoOpenFallback = autoOpenLandingOnTap,
+                    notificationData =
+                        notificationDataJson?.let { deserializeNotificationData(it) } ?: emptyMap(),
+                    autoOpenFallback = autoHandleLandingURL,
                 ),
         )
     }
