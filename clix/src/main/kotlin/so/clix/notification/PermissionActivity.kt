@@ -51,8 +51,10 @@ internal class PermissionActivity : Activity() {
     }
 
     private fun finishWithResult(granted: Boolean) {
-        resultCallback?.invoke(granted)
-        resultCallback = null
+        synchronized(callbackLock) {
+            resultCallback?.invoke(granted)
+            resultCallback = null
+        }
 
         savePendingState(false)
 
@@ -76,7 +78,8 @@ internal class PermissionActivity : Activity() {
         private const val KEY_TIMESTAMP = "clix_permission_timestamp"
         private const val RESULT_TIMEOUT_MS = 5000L
 
-        private var resultCallback: ((Boolean) -> Unit)? = null
+        @Volatile private var resultCallback: ((Boolean) -> Unit)? = null
+        private val callbackLock = Any()
 
         /**
          * Request notification permission without requiring Activity parameter. Uses Application
@@ -86,6 +89,13 @@ internal class PermissionActivity : Activity() {
          * @return true if permission was granted, false otherwise
          */
         internal suspend fun requestPermission(context: android.content.Context): Boolean {
+            synchronized(callbackLock) {
+                if (resultCallback != null) {
+                    ClixLogger.warn("Permission request already in progress")
+                    return false
+                }
+            }
+
             val wasPending = Clix.storageService.get<Boolean>(KEY_PENDING) ?: false
 
             if (wasPending) {
@@ -105,7 +115,13 @@ internal class PermissionActivity : Activity() {
             }
 
             return suspendCancellableCoroutine { continuation ->
-                resultCallback = { granted -> continuation.resume(granted) }
+                synchronized(callbackLock) {
+                    resultCallback = { granted -> continuation.resume(granted) }
+                }
+
+                continuation.invokeOnCancellation {
+                    synchronized(callbackLock) { resultCallback = null }
+                }
 
                 // Use application context to start activity
                 val intent = Intent(context, PermissionActivity::class.java)

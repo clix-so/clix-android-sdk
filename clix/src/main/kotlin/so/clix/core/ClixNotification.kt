@@ -21,8 +21,9 @@ object ClixNotification {
 
     @Volatile private var autoHandleLandingURL: Boolean = true
 
-    private var messageHandler: (suspend (Map<String, Any?>) -> Boolean)? = null
-    private var openedHandler: ((Map<String, Any?>) -> Unit)? = null
+    @Volatile private var messageHandler: (suspend (Map<String, Any?>) -> Boolean)? = null
+
+    @Volatile private var openedHandler: ((Map<String, Any?>) -> Unit)? = null
 
     internal data class NotificationTapPayload(
         val notificationData: Map<String, Any?>,

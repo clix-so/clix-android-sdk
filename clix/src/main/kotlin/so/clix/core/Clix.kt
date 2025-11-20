@@ -27,10 +27,10 @@ import so.clix.utils.logging.ClixLogger
  */
 @Suppress("TooManyFunctions")
 object Clix {
+    @JvmField val Notification = ClixNotification
+
     private val COROUTINE_CONTEXT by lazy { SupervisorJob() }
     internal val coroutineScope = CoroutineScope(COROUTINE_CONTEXT)
-
-    @JvmField val Notification = ClixNotification
 
     internal lateinit var environment: ClixEnvironment
 

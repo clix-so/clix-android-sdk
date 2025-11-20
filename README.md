@@ -218,8 +218,47 @@ class MyMessagingService : ClixMessagingService() {
 - Automatic device token registration and updates
 - Push notification event tracking
 - Duplicate notification prevention
-- Deep linking support
+- Deep linking support (automatic landing URL handling)
 - Use `Clix.Notification.configure(autoHandleLandingURL = false)` to disable automatic landing URL handling
+
+#### Deep Link Handling
+
+The SDK automatically handles landing URLs in push notifications. When a user taps a notification:
+
+1. **Automatic handling (default)**: The SDK opens the `landing_url` from the notification payload
+2. **Custom handling**: Disable automatic handling and implement your own routing:
+
+```kotlin
+// Disable automatic handling
+Clix.Notification.configure(
+  autoRequestPermission = false,
+  autoHandleLandingURL = false
+)
+
+// Handle custom routing
+Clix.Notification.onNotificationOpened { notificationData ->
+  val clixData = notificationData["clix"] as? Map<*, *>
+  val landingURL = clixData?.get("landing_url") as? String
+
+  if (landingURL != null) {
+    // Parse and route to specific app screen
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(landingURL))
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    startActivity(intent)
+  }
+}
+```
+
+**Payload structure:**
+```json
+{
+  "clix": {
+    "message_id": "msg_123",
+    "landing_url": "myapp://screen/detail?id=123",
+    "campaign_id": "campaign_456"
+  }
+}
+```
 
 #### Clix.Notification API reference
 

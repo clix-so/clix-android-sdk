@@ -268,18 +268,22 @@ internal class NotificationService(
     }
 
     private fun recordReceivedMessageId(messageId: String): Boolean {
-        val previous = storageService.get<String>(lastReceivedMessageIdKey)
-        if (previous == messageId) {
-            return false
+        synchronized(this) {
+            val previous = storageService.get<String>(lastReceivedMessageIdKey)
+            if (previous == messageId) {
+                return false
+            }
+            storageService.set(lastReceivedMessageIdKey, messageId)
+            return true
         }
-        storageService.set(lastReceivedMessageIdKey, messageId)
-        return true
     }
 
     private fun recoverReceivedMessageId(messageId: String) {
-        val previous = storageService.get<String>(lastReceivedMessageIdKey)
-        if (previous == messageId) {
-            storageService.remove(lastReceivedMessageIdKey)
+        synchronized(this) {
+            val previous = storageService.get<String>(lastReceivedMessageIdKey)
+            if (previous == messageId) {
+                storageService.remove(lastReceivedMessageIdKey)
+            }
         }
     }
 
