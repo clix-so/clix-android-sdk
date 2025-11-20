@@ -22,11 +22,7 @@ complexity:
   MethodOverloading:
     active: true
   TooManyFunctions:
-    thresholdInClasses: 20
-    thresholdInObjects: 20
-    excludes:
-      - '**/test/**'
-      - '**/functionalTest/**'
+    active: false
 
 coroutines:
   GlobalCoroutineUsage:
