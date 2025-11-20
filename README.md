@@ -123,7 +123,7 @@ Clix.setLogLevel(ClixLogLevel.DEBUG)
 
 ### Push Notification Integration
 
-#### 1. Setup Notification Handling
+#### 1. Configure Notification Handling
 
 Initialize notification handling in your `Application` or `MainActivity`:
 
@@ -134,8 +134,11 @@ class MyApplication : Application() {
   override fun onCreate() {
     super.onCreate()
 
-    // Setup with automatic permission request
-    Clix.Notification.setup(autoRequestPermission = true)
+    // Configure with automatic permission request and landing URL handling
+    Clix.Notification.configure(
+      autoRequestPermission = true,
+      autoHandleLandingURL = true
+    )
   }
 }
 ```
@@ -151,7 +154,7 @@ class MainActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
 
     lifecycleScope.launch {
-      val granted = Clix.Notification.requestNotificationPermission()
+      val granted = Clix.Notification.requestPermission()
       if (granted) {
         // Permission granted
       }
@@ -169,9 +172,6 @@ import com.google.firebase.messaging.RemoteMessage
 import so.clix.notification.ClixMessagingService
 
 class MyMessagingService : ClixMessagingService() {
-  // Optional: Control landing URL auto-opening
-  override val autoOpenLandingOnTap: Boolean = true
-
   override fun onMessageReceived(remoteMessage: RemoteMessage) {
     super.onMessageReceived(remoteMessage)
     // Custom notification handling
@@ -190,7 +190,7 @@ class MyMessagingService : ClixMessagingService() {
 - Push notification event tracking
 - Duplicate notification prevention
 - Deep linking support
-- Override `autoOpenLandingOnTap` to control landing URL behavior
+- Use `Clix.Notification.configure(autoHandleLandingURL = false)` to disable automatic landing URL handling
 
 ## Proguard
 

@@ -19,9 +19,10 @@ object ClixNotification {
     @Volatile private var isSetupCalled = false
     private val setupLock = Any()
 
-    @Volatile private var autoOpenLandingOnTap: Boolean = true
+    @Volatile private var autoHandleLandingURL: Boolean = true
 
     private var willShowHandler: (suspend (Map<String, Any?>) -> Boolean)? = null
+    private var openedHandler: ((Map<String, Any?>) -> Unit)? = null
 
     internal data class NotificationTapPayload(
         val notificationData: Map<String, Any?>,
@@ -33,27 +34,32 @@ object ClixNotification {
     )
 
     /**
-     * Setup notification handling with optional auto permission request.
+     * Configure push notification handling with optional settings.
      *
      * This should be called once, typically inside Application.onCreate(). When
      * [autoRequestPermission] is true the POST_NOTIFICATIONS prompt will automatically appear on
      * Android 13+ devices.
+     *
+     * @param autoRequestPermission Whether to automatically request notification permission
+     * @param autoHandleLandingURL Whether to automatically open landing URLs when notifications are tapped
      */
-    fun setup(autoRequestPermission: Boolean = false) {
+    fun configure(autoRequestPermission: Boolean = false, autoHandleLandingURL: Boolean = true) {
         synchronized(setupLock) {
             if (isSetupCalled) {
-                ClixLogger.debug("ClixNotification.setup() already called, skipping")
+                ClixLogger.debug("ClixNotification.configure() already called, skipping")
                 return
             }
             isSetupCalled = true
         }
 
-        ClixLogger.debug("ClixNotification.setup(autoRequestPermission: $autoRequestPermission)")
+        ClixLogger.debug("ClixNotification.configure(autoRequestPermission: $autoRequestPermission, autoHandleLandingURL: $autoHandleLandingURL)")
+
+        this.autoHandleLandingURL = autoHandleLandingURL
 
         if (autoRequestPermission) {
             Clix.coroutineScope.launch {
                 try {
-                    val granted = requestNotificationPermission()
+                    val granted = requestPermission()
                     Clix.setPushPermissionGranted(granted)
                     ClixLogger.debug("Auto notification permission result: $granted")
                 } catch (e: Exception) {
@@ -63,26 +69,30 @@ object ClixNotification {
         }
     }
 
-    /** Globally enable/disable automatic landing URL opening when a notification is tapped. */
-    fun setAutoOpenLandingOnTap(enabled: Boolean) {
-        autoOpenLandingOnTap = enabled
-        ClixLogger.debug("autoOpenLandingOnTap set to $enabled")
-    }
-
-    /** Register a handler invoked before the SDK displays a notification in the foreground. */
-    fun setNotificationWillShowInForegroundHandler(
-        handler: (suspend (Map<String, Any?>) -> Boolean)?
-    ) {
+    /**
+     * Register handler for messages received while app is in foreground.
+     *
+     * @param handler Handler that returns true to display the notification, false to suppress it
+     */
+    fun onMessage(handler: (suspend (Map<String, Any?>) -> Boolean)?) {
         willShowHandler = handler
     }
 
-    /** Register a callback invoked when the user taps a notification. */
-    fun setNotificationOpenedHandler(handler: ((Map<String, Any?>) -> Unit)?) {
+    /**
+     * Register handler for when user taps on a notification.
+     *
+     * @param handler Handler that receives the notification data
+     */
+    fun onNotificationOpened(handler: ((Map<String, Any?>) -> Unit)?) {
         openedHandler = handler
     }
 
-    /** Request notification permission from the user. */
-    suspend fun requestNotificationPermission(): Boolean {
+    /**
+     * Request notification permissions from the user.
+     *
+     * @return true if permission was granted, false otherwise
+     */
+    suspend fun requestPermission(): Boolean {
         return try {
             Clix.notificationService.requestNotificationPermission()
         } catch (e: Exception) {
@@ -115,7 +125,7 @@ object ClixNotification {
         Clix.notificationService.handleNotificationReceived(
             payload = payload,
             notificationData = notificationData,
-            autoOpenLandingOnTap = autoOpenLandingOnTap,
+            autoOpenLandingOnTap = autoHandleLandingURL,
         )
     }
 
@@ -140,7 +150,7 @@ object ClixNotification {
             }
         }
 
-        val shouldAutoOpen = autoOpenLandingOnTap && payload.autoOpenFallback
+        val shouldAutoOpen = autoHandleLandingURL && payload.autoOpenFallback
         if (shouldAutoOpen) {
             openLandingURLIfPresent(context, payload.landingUrl)
         } else {
