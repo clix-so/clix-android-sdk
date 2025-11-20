@@ -25,7 +25,6 @@ import so.clix.utils.logging.ClixLogger
  * All public methods include exception handling to prevent crashes in client applications.
  * Exceptions are logged using ClixLogger.
  */
-@Suppress("TooManyFunctions")
 object Clix {
     // Public API
     @JvmField val Notification = ClixNotification
