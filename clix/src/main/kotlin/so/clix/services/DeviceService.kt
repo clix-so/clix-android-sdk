@@ -27,7 +27,11 @@ internal class DeviceService(private val storageService: StorageService) {
     }
 
     suspend fun removeProjectUserId() {
-        removeUserProperties(listOf("userId"))
+        removeUserProperties(listOf(USER_ID_PROPERTY_NAME))
+    }
+
+    companion object {
+        private const val USER_ID_PROPERTY_NAME = "userId"
     }
 
     suspend fun updateUserProperties(properties: Map<String, Any>) {

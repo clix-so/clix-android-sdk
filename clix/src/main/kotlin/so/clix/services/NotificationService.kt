@@ -51,6 +51,18 @@ internal class NotificationService(
 
     init {
         createNotificationChannel()
+        migrateStorageKeys()
+    }
+
+    private fun migrateStorageKeys() {
+        // Migrate from old key to new key (one-time migration)
+        val oldKey = "clix_last_notification"
+        val oldValue = storageService.get<String>(oldKey)
+        if (oldValue != null) {
+            storageService.set(lastReceivedMessageIdKey, oldValue)
+            storageService.remove(oldKey)
+            ClixLogger.debug("Migrated notification storage key: $oldKey -> $lastReceivedMessageIdKey")
+        }
     }
 
     private fun createNotificationChannel() {
@@ -186,18 +198,18 @@ internal class NotificationService(
         autoOpenLandingOnTap: Boolean = true,
     ) {
         try {
-            val shouldTrack = recordReceivedMessageId(payload.messageId)
-            if (!shouldTrack) {
-                val eventName = NotificationEvent.PUSH_NOTIFICATION_RECEIVED.name
-                ClixLogger.debug(
-                    "Skipping duplicate $eventName for messageId: ${payload.messageId}"
-                )
-                return
-            }
-
             if (hasNotificationPermission(context)) {
-                showNotification(payload, notificationData, autoOpenLandingOnTap)
+                val shouldTrack = recordReceivedMessageId(payload.messageId)
+                if (!shouldTrack) {
+                    val eventName = NotificationEvent.PUSH_NOTIFICATION_RECEIVED.name
+                    ClixLogger.debug(
+                        "Skipping duplicate $eventName for messageId: ${payload.messageId}"
+                    )
+                    return
+                }
+
                 try {
+                    showNotification(payload, notificationData, autoOpenLandingOnTap)
                     trackPushNotificationReceivedEvent(
                         payload.messageId,
                         payload.userJourneyId,
