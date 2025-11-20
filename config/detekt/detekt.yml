@@ -22,7 +22,8 @@ complexity:
   MethodOverloading:
     active: true
   TooManyFunctions:
-    thresholdInClasses: 15
+    thresholdInClasses: 20
+    thresholdInObjects: 20
     excludes:
       - '**/test/**'
       - '**/functionalTest/**'

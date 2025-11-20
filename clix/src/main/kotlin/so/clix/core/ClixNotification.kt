@@ -16,21 +16,16 @@ import so.clix.utils.logging.ClixLogger
  * landing routing) so apps no longer need to subclass Firebase services for basic overrides.
  */
 object ClixNotification {
-    @Volatile
-    private var isConfigureCalled = false
+    @Volatile private var isConfigureCalled = false
     private val configureLock = Any()
 
-    @Volatile
-    private var autoHandleLandingURL: Boolean = true
+    @Volatile private var autoHandleLandingURL: Boolean = true
 
-    @Volatile
-    private var messageHandler: (suspend (Map<String, Any?>) -> Boolean)? = null
+    @Volatile private var messageHandler: (suspend (Map<String, Any?>) -> Boolean)? = null
 
-    @Volatile
-    private var backgroundMessageHandler: ((Map<String, Any?>) -> Unit)? = null
+    @Volatile private var backgroundMessageHandler: ((Map<String, Any?>) -> Unit)? = null
 
-    @Volatile
-    private var openedHandler: ((Map<String, Any?>) -> Unit)? = null
+    @Volatile private var openedHandler: ((Map<String, Any?>) -> Unit)? = null
 
     internal data class NotificationTapPayload(
         val notificationData: Map<String, Any?>,
@@ -63,7 +58,7 @@ object ClixNotification {
 
         ClixLogger.debug(
             "ClixNotification.configure(autoRequestPermission: $autoRequestPermission, " +
-                    "autoHandleLandingURL: $autoHandleLandingURL)"
+                "autoHandleLandingURL: $autoHandleLandingURL)"
         )
 
         this.autoHandleLandingURL = autoHandleLandingURL
@@ -72,7 +67,7 @@ object ClixNotification {
             Clix.coroutineScope.launch {
                 try {
                     val granted = requestPermission()
-                    Clix.setPushPermissionGranted(granted)
+                    setPermissionGranted(granted)
                     ClixLogger.debug("Auto notification permission result: $granted")
                 } catch (e: Exception) {
                     ClixLogger.error("Failed to auto request notification permission", e)
