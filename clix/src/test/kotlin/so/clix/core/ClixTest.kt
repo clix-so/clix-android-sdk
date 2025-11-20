@@ -222,7 +222,7 @@ class ClixTest {
         every { tokenService.getCurrentToken() } returns expectedToken
 
         // When
-        val actualToken = Clix.getToken()
+        val actualToken = Clix.Notification.getToken()
 
         // Then
         assertEquals(expectedToken, actualToken)
@@ -236,7 +236,7 @@ class ClixTest {
         every { tokenService.getCurrentToken() } throws RuntimeException("Test exception")
 
         // When
-        val result = Clix.getToken()
+        val result = Clix.Notification.getToken()
 
         // Then
         assertEquals(null, result)

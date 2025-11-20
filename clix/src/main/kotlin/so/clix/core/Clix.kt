@@ -27,7 +27,8 @@ import so.clix.utils.logging.ClixLogger
  */
 @Suppress("TooManyFunctions")
 object Clix {
-    @JvmField val Notification = ClixNotification
+    @JvmField
+    val Notification = ClixNotification
 
     private val COROUTINE_CONTEXT by lazy { SupervisorJob() }
     internal val coroutineScope = CoroutineScope(COROUTINE_CONTEXT)
@@ -222,38 +223,6 @@ object Clix {
         } catch (e: Exception) {
             ClixLogger.error("Failed to get device ID", e)
             return ""
-        }
-    }
-
-    /**
-     * Gets the current push token for the device.
-     *
-     * @return The push token as a String, or null if no token is available.
-     */
-    @JvmStatic
-    fun getPushToken(): String? {
-        try {
-            return tokenService.getCurrentToken()
-        } catch (e: Exception) {
-            ClixLogger.error("Failed to get push token", e)
-            return null
-        }
-    }
-
-    /**
-     * Sets the push permission granted status.
-     *
-     * This method should be called after the user grants or denies push notification permission. It
-     * updates the device's push permission status on the server.
-     *
-     * @param isGranted Whether push notification permission is granted.
-     */
-    @JvmStatic
-    suspend fun setPushPermissionGranted(isGranted: Boolean) {
-        try {
-            deviceService.upsertIsPushPermissionGranted(isGranted)
-        } catch (e: Exception) {
-            ClixLogger.error("Failed to set push permission granted", e)
         }
     }
 }

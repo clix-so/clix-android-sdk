@@ -79,7 +79,7 @@ fun MainScreen() {
         }
     val fcmTokenText =
         try {
-            Clix.getToken() ?: "N/A"
+            Clix.Notification.getToken() ?: "N/A"
         } catch (e: Exception) {
             "N/A"
         }

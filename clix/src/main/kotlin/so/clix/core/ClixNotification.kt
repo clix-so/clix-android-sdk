@@ -16,14 +16,21 @@ import so.clix.utils.logging.ClixLogger
  * landing routing) so apps no longer need to subclass Firebase services for basic overrides.
  */
 object ClixNotification {
-    @Volatile private var isConfigureCalled = false
+    @Volatile
+    private var isConfigureCalled = false
     private val configureLock = Any()
 
-    @Volatile private var autoHandleLandingURL: Boolean = true
+    @Volatile
+    private var autoHandleLandingURL: Boolean = true
 
-    @Volatile private var messageHandler: (suspend (Map<String, Any?>) -> Boolean)? = null
+    @Volatile
+    private var messageHandler: (suspend (Map<String, Any?>) -> Boolean)? = null
 
-    @Volatile private var openedHandler: ((Map<String, Any?>) -> Unit)? = null
+    @Volatile
+    private var backgroundMessageHandler: ((Map<String, Any?>) -> Unit)? = null
+
+    @Volatile
+    private var openedHandler: ((Map<String, Any?>) -> Unit)? = null
 
     internal data class NotificationTapPayload(
         val notificationData: Map<String, Any?>,
@@ -56,7 +63,7 @@ object ClixNotification {
 
         ClixLogger.debug(
             "ClixNotification.configure(autoRequestPermission: $autoRequestPermission, " +
-                "autoHandleLandingURL: $autoHandleLandingURL)"
+                    "autoHandleLandingURL: $autoHandleLandingURL)"
         )
 
         this.autoHandleLandingURL = autoHandleLandingURL
@@ -74,35 +81,68 @@ object ClixNotification {
         }
     }
 
-    /**
-     * Register handler for messages received while app is in foreground.
-     *
-     * @param handler Handler that returns true to display the notification, false to suppress it
-     */
+    /** Register handler for foreground messages. */
     fun onMessage(handler: (suspend (Map<String, Any?>) -> Boolean)?) {
         messageHandler = handler
     }
 
-    /**
-     * Register handler for when user taps on a notification.
-     *
-     * @param handler Handler that receives the notification data
-     */
+    /** Register handler for background messages. */
+    fun onBackgroundMessage(handler: ((Map<String, Any?>) -> Unit)?) {
+        backgroundMessageHandler = handler
+    }
+
+    /** Register handler for notification taps. */
     fun onNotificationOpened(handler: ((Map<String, Any?>) -> Unit)?) {
         openedHandler = handler
     }
 
-    /**
-     * Request notification permissions from the user.
-     *
-     * @return true if permission was granted, false otherwise
-     */
+    /** Returns the current FCM token. */
+    fun getToken(): String? {
+        return try {
+            Clix.tokenService.getCurrentToken()
+        } catch (e: Exception) {
+            ClixLogger.error("Failed to get token", e)
+            null
+        }
+    }
+
+    /** Deletes the FCM token. */
+    suspend fun deleteToken() {
+        try {
+            Clix.tokenService.clearTokens()
+            Clix.deviceService.upsertToken("")
+            ClixLogger.debug("FCM token deleted successfully")
+        } catch (e: Exception) {
+            ClixLogger.error("Failed to delete token", e)
+        }
+    }
+
+    /** Requests notification permissions. */
     suspend fun requestPermission(): Boolean {
         return try {
             Clix.notificationService.requestNotificationPermission()
         } catch (e: Exception) {
             ClixLogger.error("Failed to request notification permission", e)
             false
+        }
+    }
+
+    /** Returns the current permission status. */
+    fun getPermissionStatus(): Boolean {
+        return try {
+            Clix.notificationService.getPermissionStatus()
+        } catch (e: Exception) {
+            ClixLogger.error("Failed to get permission status", e)
+            false
+        }
+    }
+
+    /** Updates the permission status on the server. */
+    suspend fun setPermissionGranted(isGranted: Boolean) {
+        try {
+            Clix.deviceService.upsertIsPushPermissionGranted(isGranted)
+        } catch (e: Exception) {
+            ClixLogger.error("Failed to set permission granted", e)
         }
     }
 

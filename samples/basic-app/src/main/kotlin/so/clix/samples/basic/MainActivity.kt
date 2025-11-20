@@ -12,6 +12,6 @@ class MainActivity : ComponentActivity() {
         setContent { AppTheme { MainScreen() } }
 
         // Setup Clix notifications with automatic permission request
-        Clix.Notification.setup(autoRequestPermission = true)
+        Clix.Notification.configure(autoRequestPermission = true)
     }
 }

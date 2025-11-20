@@ -302,6 +302,10 @@ internal class NotificationService(
         }
     }
 
+    fun getPermissionStatus(): Boolean {
+        return NotificationManagerCompat.from(context).areNotificationsEnabled()
+    }
+
     companion object {
         private const val CONNECT_TIMEOUT_MS = 1000L
         private const val READ_TIMEOUT_MS = 3000L
