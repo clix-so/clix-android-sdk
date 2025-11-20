@@ -21,7 +21,7 @@ object ClixNotification {
 
     @Volatile private var autoHandleLandingURL: Boolean = true
 
-    private var willShowHandler: (suspend (Map<String, Any?>) -> Boolean)? = null
+    private var messageHandler: (suspend (Map<String, Any?>) -> Boolean)? = null
     private var openedHandler: ((Map<String, Any?>) -> Unit)? = null
 
     internal data class NotificationTapPayload(
@@ -75,7 +75,7 @@ object ClixNotification {
      * @param handler Handler that returns true to display the notification, false to suppress it
      */
     fun onMessage(handler: (suspend (Map<String, Any?>) -> Boolean)?) {
-        willShowHandler = handler
+        messageHandler = handler
     }
 
     /**
@@ -105,18 +105,18 @@ object ClixNotification {
         notificationData: Map<String, Any?>,
         payload: ClixPushNotificationPayload,
     ) {
-        val handler = willShowHandler
+        val handler = messageHandler
         if (handler != null) {
             val shouldDisplay =
                 try {
                     handler(notificationData)
                 } catch (e: Exception) {
-                    ClixLogger.error("Notification will-show handler failed", e)
+                    ClixLogger.error("Message handler failed", e)
                     true
                 }
             if (!shouldDisplay) {
                 ClixLogger.debug(
-                    "Notification will-show handler suppressed payload ${payload.messageId}"
+                    "Message handler suppressed payload ${payload.messageId}"
                 )
                 return
             }
