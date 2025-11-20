@@ -41,7 +41,8 @@ object ClixNotification {
      * Android 13+ devices.
      *
      * @param autoRequestPermission Whether to automatically request notification permission
-     * @param autoHandleLandingURL Whether to automatically open landing URLs when notifications are tapped
+     * @param autoHandleLandingURL Whether to automatically open landing URLs when notifications are
+     *   tapped
      */
     fun configure(autoRequestPermission: Boolean = false, autoHandleLandingURL: Boolean = true) {
         synchronized(setupLock) {
@@ -52,7 +53,9 @@ object ClixNotification {
             isSetupCalled = true
         }
 
-        ClixLogger.debug("ClixNotification.configure(autoRequestPermission: $autoRequestPermission, autoHandleLandingURL: $autoHandleLandingURL)")
+        ClixLogger.debug(
+            "ClixNotification.configure(autoRequestPermission: $autoRequestPermission, autoHandleLandingURL: $autoHandleLandingURL)"
+        )
 
         this.autoHandleLandingURL = autoHandleLandingURL
 
@@ -115,9 +118,7 @@ object ClixNotification {
                     true
                 }
             if (!shouldDisplay) {
-                ClixLogger.debug(
-                    "Message handler suppressed payload ${payload.messageId}"
-                )
+                ClixLogger.debug("Message handler suppressed payload ${payload.messageId}")
                 return
             }
         }
