@@ -10,7 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Push Notifications**
   - `ClixNotification` interface for setup and permission management
-  - `autoOpenLandingOnTap` override to control landing URL behavior
 
 ### Fixed
 
