@@ -28,6 +28,8 @@ object ClixNotification {
 
     @Volatile private var openedHandler: ((Map<String, Any?>) -> Unit)? = null
 
+    @Volatile private var fcmTokenErrorHandler: ((Exception) -> Unit)? = null
+
     /**
      * Configure push notification handling with optional settings.
      *
@@ -68,22 +70,71 @@ object ClixNotification {
         }
     }
 
-    /** Register handler for foreground messages. */
+    /**
+     * Register a handler for foreground messages received when the app is in the foreground.
+     *
+     * The handler receives notification data as a map and should return true to display the
+     * notification or false to suppress it. If no handler is registered or if the handler throws
+     * an exception, the notification will be displayed by default.
+     *
+     * @param handler A suspending function that receives notification data and returns whether to
+     *   display the notification. Pass null to unregister the handler.
+     */
     fun onMessage(handler: (suspend (Map<String, Any?>) -> Boolean)?) {
         messageHandler = handler
     }
 
-    /** Register handler for background messages. */
+    /**
+     * Register a handler for background messages received when the app is in the background or
+     * terminated.
+     *
+     * This handler is invoked when a notification is received while the app is not in the
+     * foreground. It allows you to process the notification data before the system displays it.
+     *
+     * @param handler A function that receives notification data as a map. Pass null to unregister
+     *   the handler.
+     */
     fun onBackgroundMessage(handler: ((Map<String, Any?>) -> Unit)?) {
         backgroundMessageHandler = handler
     }
 
-    /** Register handler for notification taps. */
+    /**
+     * Register a handler that is invoked when a user taps on a notification.
+     *
+     * This handler is called before any automatic landing URL navigation occurs. It receives the
+     * notification data as a map, allowing you to perform custom actions or analytics tracking
+     * when a notification is opened.
+     *
+     * @param handler A function that receives notification data as a map. Pass null to unregister
+     *   the handler.
+     */
     fun onNotificationOpened(handler: ((Map<String, Any?>) -> Unit)?) {
         openedHandler = handler
     }
 
-    /** Returns the current FCM token. */
+    /**
+     * Register a handler for FCM token errors.
+     *
+     * This handler is invoked when there is an error fetching or refreshing the Firebase Cloud
+     * Messaging (FCM) token. It allows you to handle token-related errors gracefully, such as
+     * logging or alerting.
+     *
+     * @param handler A function that receives the Exception that occurred. Pass null to unregister
+     *   the handler.
+     */
+    fun onFcmTokenError(handler: ((Exception) -> Unit)?) {
+        fcmTokenErrorHandler = handler
+    }
+
+    /**
+     * Returns the current Firebase Cloud Messaging (FCM) token for this device.
+     *
+     * The FCM token is used to uniquely identify this device for push notifications. This token
+     * can be used for testing or debugging purposes.
+     *
+     * @return The current FCM token as a String, or null if the token is not available or if an
+     *   error occurs.
+     */
     fun getToken(): String? {
         return try {
             Clix.tokenService.getCurrentToken()
@@ -93,7 +144,16 @@ object ClixNotification {
         }
     }
 
-    /** Deletes the FCM token. */
+    /**
+     * Deletes the current FCM token and notifies the server.
+     *
+     * This clears the locally stored FCM token and updates the server to indicate that this device
+     * no longer has a valid token. After deletion, the device will no longer receive push
+     * notifications until a new token is generated and registered.
+     *
+     * This is a suspending function and must be called from a coroutine or another suspending
+     * function.
+     */
     suspend fun deleteToken() {
         try {
             Clix.tokenService.clearTokens()
@@ -104,7 +164,18 @@ object ClixNotification {
         }
     }
 
-    /** Requests notification permissions. */
+    /**
+     * Requests notification permissions from the user.
+     *
+     * On Android 13 (API level 33) and above, this will display the system permission dialog to
+     * request POST_NOTIFICATIONS permission. On earlier Android versions, this will always return
+     * true as notification permissions are granted by default.
+     *
+     * This is a suspending function and must be called from a coroutine or another suspending
+     * function.
+     *
+     * @return true if the permission was granted, false otherwise.
+     */
     suspend fun requestPermission(): Boolean {
         return try {
             Clix.notificationService.requestNotificationPermission()
@@ -114,7 +185,15 @@ object ClixNotification {
         }
     }
 
-    /** Returns the current permission status. */
+    /**
+     * Returns the current notification permission status.
+     *
+     * This checks whether the app currently has permission to display notifications. On Android 13
+     * (API level 33) and above, this checks the POST_NOTIFICATIONS permission. On earlier versions,
+     * this always returns true as notification permissions are granted by default.
+     *
+     * @return true if notification permission is granted, false otherwise.
+     */
     fun getPermissionStatus(): Boolean {
         return try {
             Clix.notificationService.getPermissionStatus()
@@ -124,7 +203,18 @@ object ClixNotification {
         }
     }
 
-    /** Updates the permission status on the server. */
+    /**
+     * Updates the notification permission status on the server.
+     *
+     * This informs the Clix backend of the current notification permission state for this device.
+     * It is typically called automatically after requesting permission, but can be called manually
+     * if needed to sync the permission state.
+     *
+     * This is a suspending function and must be called from a coroutine or another suspending
+     * function.
+     *
+     * @param isGranted true if notification permission is granted, false otherwise.
+     */
     suspend fun setPermissionGranted(isGranted: Boolean) {
         try {
             Clix.deviceService.upsertIsPushPermissionGranted(isGranted)
@@ -192,6 +282,11 @@ object ClixNotification {
                 "Auto open disabled, skipping landing navigation for ${payload.messageId}"
             )
         }
+    }
+
+    internal fun handleFcmTokenError(error: Exception) {
+        ClixLogger.error("FCM token error", error)
+        fcmTokenErrorHandler?.invoke(error)
     }
 
     private fun openLandingURLIfPresent(context: Context, landingUrl: String?): Boolean {

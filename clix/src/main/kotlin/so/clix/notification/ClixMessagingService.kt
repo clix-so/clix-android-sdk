@@ -56,6 +56,7 @@ open class ClixMessagingService : FirebaseMessagingService() {
                 Clix.deviceService.upsertToken(token)
             } catch (e: Exception) {
                 ClixLogger.error("upsertToken failure:", e)
+                Clix.Notification.handleFcmTokenError(e)
             }
         }
     }

@@ -26,7 +26,14 @@ import so.clix.utils.logging.ClixLogger
  * Exceptions are logged using ClixLogger.
  */
 object Clix {
-    // Public API
+    /**
+     * Notification management interface for handling push notifications, permissions, and related
+     * functionality.
+     *
+     * Use this to configure notification behavior, register handlers, and manage FCM tokens.
+     *
+     * @see ClixNotification
+     */
     @JvmField val Notification = ClixNotification
 
     // Private implementation
@@ -89,6 +96,7 @@ object Clix {
                     deviceService.upsertToken(finalToken)
                 } catch (e: Exception) {
                     ClixLogger.error("Failed to fetch or upsert FCM token", e)
+                    ClixNotification.handleFcmTokenError(e)
                 }
             }
         } catch (e: Exception) {

@@ -168,6 +168,12 @@ class MyApplication : Application() {
         // Handle custom routing
       }
     }
+
+    // Optional: handle FCM token errors
+    Clix.Notification.onFcmTokenError { error ->
+      Log.e("MyApp", "FCM token error: ${error.message}", error)
+      // Handle token registration failures (e.g., Firebase config issues, network errors)
+    }
   }
 }
 ```
@@ -272,7 +278,12 @@ Clix.Notification.onNotificationOpened { notificationData ->
 - `configure(autoRequestPermission:autoHandleLandingURL:)`: Configure push notification handling
 - `onMessage(handler:)`: Register handler for foreground messages
 - `onNotificationOpened(handler:)`: Register handler for notification taps
+- `onFcmTokenError(handler:)`: Register handler for FCM token errors
 - `requestPermission()`: Request notification permissions
+- `getToken()`: Get current FCM token
+- `deleteToken()`: Delete FCM token
+- `getPermissionStatus()`: Get current permission status
+- `setPermissionGranted(isGranted:)`: Update permission status on server
 
 ## Error Handling
 
@@ -316,6 +327,26 @@ override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<Str
 }
 ```
 
+### FCM Token Errors
+
+If you're experiencing FCM token registration failures, use the error handler to diagnose:
+
+```kotlin
+Clix.Notification.onFcmTokenError { error ->
+  Log.e("FCM", "Token error: ${error.message}", error)
+  // Common causes:
+  // - Missing or invalid google-services.json
+  // - Network connectivity issues
+  // - Firebase service errors
+  // - Server-side token registration failures
+}
+```
+
+Common FCM token errors:
+- **"SERVICE_NOT_AVAILABLE"**: Network issues or Firebase service down
+- **"INVALID_SENDER"**: Incorrect Firebase configuration (check google-services.json)
+- **Token registration failure**: Backend API errors when saving token
+
 ### Debugging Checklist
 
 If push notifications aren't working, verify:
@@ -326,6 +357,7 @@ If push notifications aren't working, verify:
 4. ✅ `Clix.setPushPermissionGranted()` is called after requesting permissions (when not using auto-request)
 5. ✅ Testing on a real device or emulator with Google Play Services
 6. ✅ Debug logs show "New token received" message
+7. ✅ Use `onFcmTokenError()` handler to catch token registration errors
 
 ### Getting Help
 
