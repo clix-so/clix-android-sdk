@@ -74,8 +74,8 @@ object ClixNotification {
      * Register a handler for foreground messages received when the app is in the foreground.
      *
      * The handler receives notification data as a map and should return true to display the
-     * notification or false to suppress it. If no handler is registered or if the handler throws
-     * an exception, the notification will be displayed by default.
+     * notification or false to suppress it. If no handler is registered or if the handler throws an
+     * exception, the notification will be displayed by default.
      *
      * @param handler A suspending function that receives notification data and returns whether to
      *   display the notification. Pass null to unregister the handler.
@@ -102,8 +102,8 @@ object ClixNotification {
      * Register a handler that is invoked when a user taps on a notification.
      *
      * This handler is called before any automatic landing URL navigation occurs. It receives the
-     * notification data as a map, allowing you to perform custom actions or analytics tracking
-     * when a notification is opened.
+     * notification data as a map, allowing you to perform custom actions or analytics tracking when
+     * a notification is opened.
      *
      * @param handler A function that receives notification data as a map. Pass null to unregister
      *   the handler.
@@ -129,8 +129,8 @@ object ClixNotification {
     /**
      * Returns the current Firebase Cloud Messaging (FCM) token for this device.
      *
-     * The FCM token is used to uniquely identify this device for push notifications. This token
-     * can be used for testing or debugging purposes.
+     * The FCM token is used to uniquely identify this device for push notifications. This token can
+     * be used for testing or debugging purposes.
      *
      * @return The current FCM token as a String, or null if the token is not available or if an
      *   error occurs.
