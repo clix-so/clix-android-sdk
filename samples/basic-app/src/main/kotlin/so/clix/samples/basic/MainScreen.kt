@@ -69,8 +69,8 @@ fun MainScreen() {
         )
     }
 
-    val projectIdText = "N/A"
-    val apiKeyText = "N/A"
+    val projectIdText = BasicApplication.userPreferences.getProjectId() ?: "N/A"
+    val apiKeyText = BasicApplication.userPreferences.getApiKey() ?: "N/A"
     val deviceIdText =
         try {
             Clix.getDeviceId()
@@ -412,7 +412,7 @@ fun MainScreen() {
                                                 "Event tracked: $eventName",
                                                 Toast.LENGTH_SHORT,
                                             )
-                                            .show()
+                                        .show()
                                     }
                                 } catch (e: Exception) {
                                     Toast.makeText(

@@ -72,7 +72,11 @@ internal class NotificationService(
         val descriptionText = "Notifications from Clix SDK"
         val importance = NotificationManager.IMPORTANCE_HIGH
         val channel =
-            NotificationChannel(channelId, name, importance).apply { description = descriptionText }
+            NotificationChannel(channelId, name, importance).apply {
+                description = descriptionText
+                enableVibration(true)
+                enableLights(true)
+            }
         notificationManager.createNotificationChannel(channel)
     }
 
@@ -152,6 +156,8 @@ internal class NotificationService(
                 .setSmallIcon(launcherIcon)
                 .setContentTitle(payload.title.orEmpty())
                 .setContentText(payload.body.orEmpty())
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
 

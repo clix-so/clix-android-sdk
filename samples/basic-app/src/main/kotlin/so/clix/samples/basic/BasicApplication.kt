@@ -19,10 +19,15 @@ class BasicApplication : Application() {
         super.onCreate()
         // Initialize UserPreferences
         userPreferences = UserPreferences(this)
-
+        userPreferences.saveProjectId("")
+        userPreferences.saveApiKey("")
         Clix.initialize(
             this,
-            ClixConfig(projectId = "", apiKey = "", logLevel = ClixLogLevel.DEBUG),
+            ClixConfig(
+                projectId = userPreferences.getProjectId()!!,
+                apiKey = userPreferences.getApiKey()!!,
+                logLevel = ClixLogLevel.DEBUG,
+            ),
         )
 
         // Load stored user ID and set it if available
