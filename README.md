@@ -357,7 +357,7 @@ If push notifications aren't working, verify:
 1. ✅ `google-services.json` is added to your app module
 2. ✅ Firebase Cloud Messaging is properly configured
 3. ✅ `ClixMessagingService` is declared in `AndroidManifest.xml`
-4. ✅ `Clix.setPushPermissionGranted()` is called after requesting permissions (when not using auto-request)
+4. ✅ `Clix.Notification.setPermissionGranted()` is called after requesting permissions (when not using auto-request)
 5. ✅ Testing on a real device or emulator with Google Play Services
 6. ✅ Debug logs show "New token received" message
 7. ✅ Use `onFcmTokenError()` handler to catch token registration errors
