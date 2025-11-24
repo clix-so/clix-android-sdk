@@ -4,12 +4,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2025-11-24
+
+### Added
+
+- **Push Notifications**
+  - `Clix.Notification` API with `configure()`, callback handlers, and permission management
+  - Theme-based Rich notifications
+
+### Fixed
+
+- **Push Notifications**
+  - Heads-up notifications not appearing for subsequent messages
+
 ## [1.2.0] - 2025-10-15
 
 ### Added
 
 - **Event Tracking**
-  - Normalized event property serialization: numeric values remain numeric, and date/time inputs are formatted to ISO 8601.
+  - Normalized event property serialization: numeric values remain numeric, and date/time inputs are formatted to ISO
+    8601.
 
 ## [1.1.2] - 2025-09-23
 

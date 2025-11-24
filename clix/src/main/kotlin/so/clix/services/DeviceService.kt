@@ -26,6 +26,10 @@ internal class DeviceService(private val storageService: StorageService) {
         deviceApiService.setProjectUserId(Clix.environment.deviceId, projectUserId)
     }
 
+    suspend fun removeProjectUserId() {
+        removeUserProperties(listOf(USER_ID_PROPERTY_NAME))
+    }
+
     suspend fun updateUserProperties(properties: Map<String, Any>) {
         try {
             val propertiesList =
@@ -41,9 +45,31 @@ internal class DeviceService(private val storageService: StorageService) {
         }
     }
 
+    suspend fun removeUserProperties(names: List<String>) {
+        if (names.isEmpty()) return
+
+        try {
+            deviceApiService.removeUserProperties(Clix.environment.deviceId, names)
+            ClixLogger.debug(message = "Removed user properties: $names")
+        } catch (e: IOException) {
+            ClixLogger.error("Network error during removing user properties", e)
+        } catch (e: SerializationException) {
+            ClixLogger.error("JSON parsing error during removing user properties", e)
+        } catch (e: ClixError.InvalidResponse) {
+            ClixLogger.error("Failed to remove user properties: ${e.message}", e)
+        }
+    }
+
     suspend fun upsertToken(token: String) {
         try {
-            val device = Clix.environment.getDevice().copy(pushToken = token)
+            val currentDevice = Clix.environment.getDevice()
+
+            if (currentDevice.pushToken == token) {
+                ClixLogger.debug("Token already exists, skipping upsert")
+                return
+            }
+
+            val device = currentDevice.copy(pushToken = token)
             Clix.environment.setDevice(device)
             deviceApiService.upsertDevice(device)
             ClixLogger.debug("Registered device token")
@@ -54,5 +80,31 @@ internal class DeviceService(private val storageService: StorageService) {
         } catch (e: ClixError.InvalidResponse) {
             ClixLogger.error("Failed to register device: ${e.message}", e)
         }
+    }
+
+    suspend fun upsertIsPushPermissionGranted(isGranted: Boolean) {
+        try {
+            val currentDevice = Clix.environment.getDevice()
+
+            if (currentDevice.isPushPermissionGranted == isGranted) {
+                ClixLogger.debug("Push permission already exists, skipping upsert")
+                return
+            }
+
+            val device = currentDevice.copy(isPushPermissionGranted = isGranted)
+            Clix.environment.setDevice(device)
+            deviceApiService.upsertDevice(device)
+            ClixLogger.debug("Updated push permission granted status: $isGranted")
+        } catch (e: IOException) {
+            ClixLogger.error("Network error during updating push permission status", e)
+        } catch (e: SerializationException) {
+            ClixLogger.error("JSON parsing error during updating push permission status", e)
+        } catch (e: ClixError.InvalidResponse) {
+            ClixLogger.error("Failed to update push permission status: ${e.message}", e)
+        }
+    }
+
+    companion object {
+        private const val USER_ID_PROPERTY_NAME = "userId"
     }
 }

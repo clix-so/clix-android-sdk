@@ -3,8 +3,6 @@ package so.clix.notification
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonNamingStrategy
 import so.clix.core.Clix
 import so.clix.models.ClixPushNotificationPayload
 import so.clix.utils.logging.ClixLogger
@@ -26,34 +24,27 @@ import so.clix.utils.logging.ClixLogger
  * </service>
  * ```
  */
-@OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
 open class ClixMessagingService : FirebaseMessagingService() {
-    private val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-        namingStrategy = JsonNamingStrategy.SnakeCase
-    }
-
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
         ClixLogger.debug("Message received $message, from: ${message.from}")
         message.data.isNotEmpty().let { ClixLogger.debug("Message data payload: ${message.data}") }
         message.notification?.let { ClixLogger.debug("Message notification body: ${it.body}") }
 
-        val payload =
-            try {
-                message.data["clix"]?.let { json.decodeFromString<ClixPushNotificationPayload>(it) }
-            } catch (e: Exception) {
-                ClixLogger.error("Failed to parse clix payload", e)
-                null
-            }
+        val notificationData: Map<String, Any?> = message.data.mapValues { it.value }
+        val payload = ClixPushNotificationPayload.decode(notificationData)
 
         if (payload == null) {
             ClixLogger.error("No valid clix payload found in message data")
             return
         }
 
-        Clix.coroutineScope.launch { Clix.notificationService.handleNotificationReceived(payload) }
+        Clix.coroutineScope.launch {
+            Clix.Notification.handleIncomingPayload(
+                notificationData = notificationData,
+                payload = payload,
+            )
+        }
     }
 
     override fun onNewToken(token: String) {
@@ -65,6 +56,7 @@ open class ClixMessagingService : FirebaseMessagingService() {
                 Clix.deviceService.upsertToken(token)
             } catch (e: Exception) {
                 ClixLogger.error("upsertToken failure:", e)
+                Clix.Notification.handleFcmTokenError(e)
             }
         }
     }

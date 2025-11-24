@@ -26,20 +26,27 @@ import so.clix.utils.logging.ClixLogger
  * Exceptions are logged using ClixLogger.
  */
 object Clix {
+    /**
+     * Notification management interface for handling push notifications, permissions, and related
+     * functionality.
+     *
+     * Use this to configure notification behavior, register handlers, and manage FCM tokens.
+     *
+     * @see ClixNotification
+     */
+    @JvmField val Notification = ClixNotification
+
+    // Private implementation
     private val COROUTINE_CONTEXT by lazy { SupervisorJob() }
-    internal val coroutineScope = CoroutineScope(COROUTINE_CONTEXT)
 
+    // Internal services
     internal lateinit var environment: ClixEnvironment
-
     internal lateinit var storageService: StorageService
-
     internal lateinit var deviceService: DeviceService
-
     internal lateinit var eventService: EventService
-
     internal lateinit var tokenService: TokenService
-
     internal lateinit var notificationService: NotificationService
+    internal val coroutineScope = CoroutineScope(COROUTINE_CONTEXT)
 
     internal const val VERSION = BuildConfig.VERSION
 
@@ -89,6 +96,7 @@ object Clix {
                     deviceService.upsertToken(finalToken)
                 } catch (e: Exception) {
                     ClixLogger.error("Failed to fetch or upsert FCM token", e)
+                    ClixNotification.handleFcmTokenError(e)
                 }
             }
         } catch (e: Exception) {
@@ -107,6 +115,16 @@ object Clix {
             deviceService.setProjectUserId(userId)
         } catch (e: Exception) {
             ClixLogger.error("Failed to set user ID", e)
+        }
+    }
+
+    /** Removes the user ID for the current user. */
+    @JvmStatic
+    suspend fun removeUserId() {
+        try {
+            deviceService.removeProjectUserId()
+        } catch (e: Exception) {
+            ClixLogger.error("Failed to remove user ID", e)
         }
     }
 
@@ -136,6 +154,34 @@ object Clix {
             deviceService.updateUserProperties(properties)
         } catch (e: Exception) {
             ClixLogger.error("Failed to set user properties", e)
+        }
+    }
+
+    /**
+     * Removes a single user property.
+     *
+     * @param name The property name to remove.
+     */
+    @JvmStatic
+    suspend fun removeUserProperty(name: String) {
+        try {
+            deviceService.removeUserProperties(listOf(name))
+        } catch (e: Exception) {
+            ClixLogger.error("Failed to remove user property: $name", e)
+        }
+    }
+
+    /**
+     * Removes multiple user properties.
+     *
+     * @param names The list of property names to remove.
+     */
+    @JvmStatic
+    suspend fun removeUserProperties(names: List<String>) {
+        try {
+            deviceService.removeUserProperties(names)
+        } catch (e: Exception) {
+            ClixLogger.error("Failed to remove user properties", e)
         }
     }
 
@@ -181,21 +227,6 @@ object Clix {
         } catch (e: Exception) {
             ClixLogger.error("Failed to get device ID", e)
             return ""
-        }
-    }
-
-    /**
-     * Gets the current token for the device.
-     *
-     * @return The token as a String, or null if no token is available.
-     */
-    @JvmStatic
-    fun getToken(): String? {
-        try {
-            return tokenService.getCurrentToken()
-        } catch (e: Exception) {
-            ClixLogger.error("Failed to get token", e)
-            return null
         }
     }
 }

@@ -59,4 +59,13 @@ internal class DeviceAPIService : ClixAPIClient() {
             data = data,
         )
     }
+
+    suspend fun removeUserProperties(deviceId: String, propertyNames: List<String>) {
+        if (propertyNames.isEmpty()) return
+
+        delete<Unit>(
+            path = "/devices/${deviceId}/user/properties",
+            params = mapOf("names" to propertyNames),
+        )
+    }
 }

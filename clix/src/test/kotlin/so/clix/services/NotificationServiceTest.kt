@@ -70,13 +70,11 @@ class NotificationServiceTest {
             val enabled = true
             val categories = listOf("news", "promotions")
 
-            // Mock context to return PERMISSION_GRANTED for notification permission
-            every {
-                context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
-            } returns android.content.pm.PackageManager.PERMISSION_GRANTED
+            // Mock NotificationManagerCompat to return notifications enabled
+            every { notificationManager.areNotificationsEnabled() } returns true
 
             // When
-            notificationService.setNotificationPreferences(context, enabled, categories)
+            notificationService.setNotificationPreferences(enabled, categories)
 
             // Then - just verify that the method completed without exceptions
             // We can't easily verify the exact settings that were saved with a real StorageService
@@ -89,18 +87,12 @@ class NotificationServiceTest {
             val enabled = false
             val categories = listOf("news", "promotions")
 
-            // We can't easily mock Build.VERSION.SDK_INT, so we'll just mock the context permission
-            // check
-            // which is what the hasNotificationPermission method uses to determine if permission is
-            // granted
-
-            // Mock context to return PERMISSION_DENIED for notification permission
-            every {
-                context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
-            } returns android.content.pm.PackageManager.PERMISSION_DENIED
+            // Mock NotificationManagerCompat to return notifications disabled
+            // (permission check is skipped when enabled = false, but mocking for completeness)
+            every { notificationManager.areNotificationsEnabled() } returns false
 
             // When
-            notificationService.setNotificationPreferences(context, enabled, categories)
+            notificationService.setNotificationPreferences(enabled, categories)
 
             // Then - just verify that the method completed without exceptions
             // We can't easily verify the exact settings that were saved with a real StorageService
