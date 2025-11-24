@@ -74,7 +74,7 @@ class NotificationServiceTest {
             every { notificationManager.areNotificationsEnabled() } returns true
 
             // When
-            notificationService.setNotificationPreferences(context, enabled, categories)
+            notificationService.setNotificationPreferences(enabled, categories)
 
             // Then - just verify that the method completed without exceptions
             // We can't easily verify the exact settings that were saved with a real StorageService
@@ -92,7 +92,7 @@ class NotificationServiceTest {
             every { notificationManager.areNotificationsEnabled() } returns false
 
             // When
-            notificationService.setNotificationPreferences(context, enabled, categories)
+            notificationService.setNotificationPreferences(enabled, categories)
 
             // Then - just verify that the method completed without exceptions
             // We can't easily verify the exact settings that were saved with a real StorageService

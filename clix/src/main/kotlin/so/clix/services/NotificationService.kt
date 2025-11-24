@@ -129,11 +129,7 @@ internal class NotificationService(
         }
     }
 
-    fun setNotificationPreferences(
-        context: Context,
-        enabled: Boolean,
-        categories: List<String>? = null,
-    ) {
+    fun setNotificationPreferences(enabled: Boolean, categories: List<String>? = null) {
         if (enabled && !hasNotificationPermission(context)) {
             throw ClixError.NotificationPermissionDenied
         }
