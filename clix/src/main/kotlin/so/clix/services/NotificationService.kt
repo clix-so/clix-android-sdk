@@ -50,8 +50,8 @@ internal class NotificationService(
     private val settingsKey = "clix_notification_settings"
     private val lastReceivedMessageIdKey = "clix_last_received_message_id"
 
-    private val launcherIcon: Int by lazy { getLauncherIcon() }
-    private val accentColor: Int? by lazy { getAccentColor() }
+    private val launcherIcon: Int by lazy { resolveLauncherIcon() }
+    private val accentColor: Int? by lazy { resolveAccentColor() }
 
     init {
         createNotificationChannel()
@@ -68,7 +68,7 @@ internal class NotificationService(
                 if (!shouldTrack) {
                     val eventName = NotificationEvent.PUSH_NOTIFICATION_RECEIVED.name
                     ClixLogger.debug(
-                        "Skipping duplicate $eventName for messageId: ${payload.messageId}",
+                        "Skipping duplicate $eventName for messageId: ${payload.messageId}"
                     )
                     return
                 }
@@ -208,7 +208,9 @@ internal class NotificationService(
         val notification = builder.build()
 
         val notificationId = payload.messageId.hashCode()
-        ClixLogger.debug("Showing notification with ID: $notificationId for messageId: ${payload.messageId}")
+        ClixLogger.debug(
+            "Showing notification with ID: $notificationId for messageId: ${payload.messageId}"
+        )
         notificationManager.notify(notificationId, notification)
     }
 
@@ -271,7 +273,7 @@ internal class NotificationService(
         notificationManager.createNotificationChannel(channel)
     }
 
-    private fun getLauncherIcon(): Int {
+    private fun resolveLauncherIcon(): Int {
         val appInfo =
             context.packageManager.getApplicationInfo(
                 context.packageName,
@@ -286,17 +288,12 @@ internal class NotificationService(
         }
     }
 
-    private fun getAccentColor(): Int? {
+    private fun resolveAccentColor(): Int? {
         return try {
             val typedValue = android.util.TypedValue()
             val theme = context.theme
 
-            if (theme.resolveAttribute(
-                    android.R.attr.colorPrimary,
-                    typedValue,
-                    true
-                )
-            ) {
+            if (theme.resolveAttribute(android.R.attr.colorPrimary, typedValue, true)) {
                 return typedValue.data
             }
 
