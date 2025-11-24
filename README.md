@@ -121,7 +121,7 @@ lifecycleScope.launch {
 val deviceId = Clix.getDeviceId()
 
 // Get push token
-val pushToken = Clix.getPushToken()
+val pushToken = Clix.Notification.getToken()
 ```
 
 ### Logging
@@ -140,22 +140,34 @@ Clix.setLogLevel(ClixLogLevel.DEBUG)
 
 #### 1. Configure Notification Handling
 
-Initialize notification handling in your `Application` class:
+Configure notification handling in your `Application` class **after** initializing the SDK:
 
 ```kotlin
 import so.clix.core.Clix
+import so.clix.core.ClixConfig
+import so.clix.utils.logging.ClixLogLevel
 
 class MyApplication : Application() {
   override fun onCreate() {
     super.onCreate()
 
-    // Configure with automatic permission request and landing URL handling
-    Clix.Notification.configure(
-      autoRequestPermission = true,
-      autoHandleLandingURL = true
+    // STEP 1: Initialize Clix SDK first
+    Clix.initialize(
+      context = this,
+      config = ClixConfig(
+        projectId = "YOUR_PROJECT_ID",
+        apiKey = "YOUR_API_KEY"
+      )
     )
 
-    // Optional: customize foreground presentation and tap handling
+    // STEP 2: Configure notification handling after initialization
+    // Note: autoRequestPermission defaults to false
+    Clix.Notification.configure(
+      autoRequestPermission = true,  // Set to true to automatically request permission
+      autoHandleLandingURL = true     // Set to true to automatically open landing URLs
+    )
+
+    // STEP 3: Optional callbacks (must be called after initialize)
     Clix.Notification.onMessage { notificationData ->
       // Return true to display the notification, false to suppress it
       true
@@ -169,7 +181,6 @@ class MyApplication : Application() {
       }
     }
 
-    // Optional: handle FCM token errors
     Clix.Notification.onFcmTokenError { error ->
       Log.e("MyApp", "FCM token error: ${error.message}", error)
       // Handle token registration failures (e.g., Firebase config issues, network errors)
@@ -178,10 +189,13 @@ class MyApplication : Application() {
 }
 ```
 
+**Important:** All `Clix.Notification` methods must be called **after** `Clix.initialize()`. Calling them before initialization will result in an error.
+
 ##### About `notificationData`
 
 - The `notificationData` map is the full FCM payload as delivered to the device; it mirrors iOS’s `userInfo` dictionary.
-- Every Clix notification callback (`onMessage`, `onBackgroundMessage`, `onNotificationOpened`) passes this map through untouched, so you can inspect both the serialized `"clix"` block and any custom keys your backend adds.
+- Every Clix notification callback (`onMessage`, `onBackgroundMessage`, `onNotificationOpened`) passes this map through
+  untouched, so you can inspect both the serialized `"clix"` block and any custom keys your backend adds.
 - `notificationData["clix"]` holds the Clix metadata JSON, while all other keys represent app-specific data.
 
 Or request permission manually:
@@ -300,17 +314,18 @@ try {
 
 ## Thread Safety
 
-The SDK is thread-safe and all operations can be called from any thread. Coroutine-based operations will automatically wait for SDK initialization to complete.
+The SDK is thread-safe and all operations can be called from any thread. Coroutine-based operations will automatically
+wait for SDK initialization to complete.
 
 ## Troubleshooting
 
 ### Push Permission Status Not Updating
 
-If you've disabled automatic permission requests (default is `false`), you must manually notify Clix when users grant or deny push permissions.
+The `autoRequestPermission` parameter defaults to **`false`**. If you're not using automatic permission requests, you must manually notify Clix when users grant or deny push permissions.
 
 #### Update Permission Status
 
-After requesting push permissions in your app, call `Clix.Notification.setPermissionGranted()`:
+When using `autoRequestPermission = false` (the default), call `Clix.Notification.setPermissionGranted()` after requesting push permissions in your app:
 
 ```kotlin
 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -346,6 +361,7 @@ Clix.Notification.onFcmTokenError { error ->
 ```
 
 Common FCM token errors:
+
 - **"SERVICE_NOT_AVAILABLE"**: Network issues or Firebase service down
 - **"INVALID_SENDER"**: Incorrect Firebase configuration (check google-services.json)
 - **Token registration failure**: Backend API errors when saving token
