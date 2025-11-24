@@ -1,39 +1,61 @@
 package so.clix.samples.basic
 
 import android.app.Application
+import android.content.Context
+import android.content.SharedPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import so.clix.core.Clix
 import so.clix.core.ClixConfig
-import so.clix.utils.logging.ClixLogLevel
 
 class BasicApplication : Application() {
-    // Create a companion object to hold the UserPreferences instance
     companion object {
-        lateinit var userPreferences: UserPreferences
+        private const val PREFS_NAME = "user_preferences"
+        private const val KEY_USER_ID = "user_id"
+
+        lateinit var instance: BasicApplication
             private set
+
+        val sharedPreferences: SharedPreferences
+            get() = instance.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
 
     override fun onCreate() {
         super.onCreate()
-        // Initialize UserPreferences
-        userPreferences = UserPreferences(this)
-        userPreferences.saveProjectId("")
-        userPreferences.saveApiKey("")
+
+        instance = this
+
         Clix.initialize(
             this,
             ClixConfig(
-                projectId = userPreferences.getProjectId()!!,
-                apiKey = userPreferences.getApiKey()!!,
-                logLevel = ClixLogLevel.DEBUG,
+                projectId = ClixConfiguration.PROJECT_ID,
+                apiKey = ClixConfiguration.API_KEY,
+                endpoint = ClixConfiguration.ENDPOINT,
+                logLevel = ClixConfiguration.LOG_LEVEL,
+                extraHeaders = ClixConfiguration.EXTRA_HEADERS
             ),
         )
 
-        // Load stored user ID and set it if available
-        val storedUserId = userPreferences.getUserId()
+        Clix.Notification.configure(autoRequestPermission = true)
+
+        updateClixValues()
+
+        val storedUserId = sharedPreferences.getString(KEY_USER_ID, null)
         if (!storedUserId.isNullOrBlank()) {
-            CoroutineScope(Dispatchers.IO).launch { Clix.setUserId(storedUserId) }
+            CoroutineScope(Dispatchers.IO).launch {
+                Clix.setUserId(storedUserId)
+            }
+        }
+    }
+
+    private fun updateClixValues() {
+        CoroutineScope(Dispatchers.Main).launch {
+            val deviceId = Clix.getDeviceId()
+            val fcmToken = Clix.Notification.getToken()
+
+            AppState.updateDeviceId(deviceId)
+            AppState.updateFCMToken(fcmToken)
         }
     }
 }

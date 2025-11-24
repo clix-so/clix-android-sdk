@@ -42,5 +42,6 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.compose.bom))
     implementation(libs.bundles.compose)
+    implementation(libs.firebase.messaging.ktx)
     debugImplementation(libs.compose.ui.tooling)
 }

@@ -1,9 +1,24 @@
 <resources>
+  <!-- App -->
   <string name="app_name">Clix Sample</string>
+
+  <!-- Info Section (displayed at top) -->
   <string name="clix_project_id">Project ID</string>
   <string name="api_key">API Key</string>
   <string name="device_id">Device ID</string>
   <string name="fcm_token">FCM Token</string>
+
+  <!-- User ID Section -->
   <string name="user_id">User ID</string>
   <string name="submit">Submit</string>
+
+  <!-- User Property Section -->
+  <string name="user_property_key">User Property Key</string>
+  <string name="user_property_value">User Property Value</string>
+  <string name="set_user_property">Set User Property</string>
+
+  <!-- Track Event Section -->
+  <string name="event_name">Event Name</string>
+  <string name="event_params">Event Parameters</string>
+  <string name="track_event">Track Event</string>
 </resources>
