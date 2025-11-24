@@ -326,7 +326,7 @@ internal class NotificationService(
                 ClixLogger.warn("Read timeout", e)
                 null
             } catch (e: Exception) {
-                e.printStackTrace()
+                ClixLogger.error("Failed to load image", e)
                 null
             }
         }
