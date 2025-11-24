@@ -27,9 +27,23 @@ internal class HTTPClient(private val json: Json) {
         if (params.isNullOrEmpty()) {
             url
         } else {
-            params.entries.joinToString(QUERY_PARAM_SEPARATOR, "$url$QUERY_PREFIX") { (k, v) ->
-                "${URLEncoder.encode(k, CHARSET_UTF8)}=${URLEncoder.encode(v.toString(), CHARSET_UTF8)}"
-            }
+            val queryParams =
+                params.entries.flatMap { (k, v) ->
+                    when (v) {
+                        is Collection<*> ->
+                            v.map { item ->
+                                val encodedKey = URLEncoder.encode(k, CHARSET_UTF8)
+                                val encodedValue = URLEncoder.encode(item.toString(), CHARSET_UTF8)
+                                "$encodedKey=$encodedValue"
+                            }
+                        else -> {
+                            val encodedKey = URLEncoder.encode(k, CHARSET_UTF8)
+                            val encodedValue = URLEncoder.encode(v.toString(), CHARSET_UTF8)
+                            listOf("$encodedKey=$encodedValue")
+                        }
+                    }
+                }
+            queryParams.joinToString(QUERY_PARAM_SEPARATOR, "$url$QUERY_PREFIX")
         }
 
     private fun setupConnection(url: String, httpRequest: HTTPRequest<*>): HttpURLConnection =

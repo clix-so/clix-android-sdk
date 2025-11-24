@@ -106,6 +106,7 @@ internal class NotificationService(
         }
     }
 
+    @Suppress("TooGenericExceptionCaught")
     suspend fun requestNotificationPermission(): Boolean {
         return try {
             if (hasNotificationPermission(context)) {
@@ -117,8 +118,10 @@ internal class NotificationService(
                 ClixLogger.debug("Requesting notification permission")
                 PermissionActivity.requestPermission(context)
             } else {
-                ClixLogger.debug("Notification permission granted at install time (Android < 13)")
-                true
+                ClixLogger.debug(
+                    "Notification permission must be managed via system settings (Android < 13)"
+                )
+                hasNotificationPermission(context)
             }
         } catch (e: Exception) {
             ClixLogger.error("Failed to request notification permission", e)
