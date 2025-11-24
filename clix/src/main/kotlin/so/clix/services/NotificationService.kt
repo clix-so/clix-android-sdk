@@ -46,158 +46,15 @@ internal class NotificationService(
 ) {
     private val notificationManager = NotificationManagerCompat.from(context)
     private val channelId = "clix_notification_channel"
+    private val groupKey = "clix_notification_group"
     private val settingsKey = "clix_notification_settings"
     private val lastReceivedMessageIdKey = "clix_last_received_message_id"
 
+    private val launcherIcon: Int by lazy { getLauncherIcon() }
+    private val accentColor: Int? by lazy { getAccentColor() }
+
     init {
         createNotificationChannel()
-        migrateStorageKeys()
-    }
-
-    private fun migrateStorageKeys() {
-        // Migrate from old key to new key (one-time migration)
-        val oldKey = "clix_last_notification"
-        val oldValue = storageService.get<String>(oldKey)
-        if (oldValue != null) {
-            storageService.set(lastReceivedMessageIdKey, oldValue)
-            storageService.remove(oldKey)
-            ClixLogger.debug(
-                "Migrated notification storage key: $oldKey -> $lastReceivedMessageIdKey"
-            )
-        }
-    }
-
-    private fun createNotificationChannel() {
-        val name = "Clix Notifications"
-        val descriptionText = "Notifications from Clix SDK"
-        val importance = NotificationManager.IMPORTANCE_HIGH
-        val channel =
-            NotificationChannel(channelId, name, importance).apply {
-                description = descriptionText
-                enableVibration(true)
-                enableLights(true)
-            }
-        notificationManager.createNotificationChannel(channel)
-    }
-
-    private fun getLauncherIcon(context: Context): Int {
-        val appInfo =
-            context.packageManager.getApplicationInfo(
-                context.packageName,
-                PackageManager.GET_META_DATA,
-            )
-
-        val launcherIcon = appInfo.icon
-        return if (launcherIcon != 0) {
-            launcherIcon
-        } else {
-            R.drawable.baseline_notifications_24
-        }
-    }
-
-    private suspend fun loadImage(src: String?): Bitmap? =
-        withContext(Dispatchers.IO) {
-            ClixLogger.debug("Loading image from URL: $src")
-
-            if (src == null) return@withContext null
-            try {
-                val url = URL(src)
-                val connection =
-                    url.openConnection().apply {
-                        connectTimeout = CONNECT_TIMEOUT_MS.toInt()
-                        readTimeout = READ_TIMEOUT_MS.toInt()
-                    }
-                connection.getInputStream().use { inputStream ->
-                    BitmapFactory.decodeStream(inputStream)
-                }
-            } catch (e: ConnectException) {
-                ClixLogger.warn("Connection error", e)
-                null
-            } catch (e: SocketTimeoutException) {
-                ClixLogger.warn("Read timeout", e)
-                null
-            } catch (e: Exception) {
-                e.printStackTrace()
-                null
-            }
-        }
-
-    @RequiresPermission(value = Manifest.permission.POST_NOTIFICATIONS, conditional = true)
-    private suspend fun showNotification(
-        payload: ClixPushNotificationPayload,
-        notificationData: Map<String, Any?>,
-        autoHandleLandingURL: Boolean = true,
-    ) {
-        val launcherIcon = getLauncherIcon(context)
-
-        val intent =
-            Intent(context, NotificationTappedActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                putExtra("messageId", payload.messageId)
-                putExtra("userJourneyId", payload.userJourneyId)
-                putExtra("userJourneyNodeId", payload.userJourneyNodeId)
-                putExtra("landingUrl", payload.landingUrl)
-                putExtra("autoHandleLandingURL", autoHandleLandingURL)
-                notificationData.toJsonString()?.let {
-                    putExtra(NotificationTappedActivity.NOTIFICATION_DATA_EXTRA, it)
-                }
-            }
-
-        val pendingIntent =
-            PendingIntent.getActivity(
-                context,
-                0,
-                intent,
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-            )
-
-        val builder =
-            NotificationCompat.Builder(context, channelId)
-                .setSmallIcon(launcherIcon)
-                .setContentTitle(payload.title.orEmpty())
-                .setContentText(payload.body.orEmpty())
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setDefaults(NotificationCompat.DEFAULT_ALL)
-                .setAutoCancel(true)
-                .setContentIntent(pendingIntent)
-
-        val bitmap = loadImage(payload.imageUrl)
-        if (bitmap != null) {
-            ClixLogger.debug("Applying BigPictureStyle to notification")
-            builder.setLargeIcon(bitmap)
-        }
-
-        val notification = builder.build()
-
-        val notificationId = System.currentTimeMillis().toInt()
-        ClixLogger.debug("Showing notification with ID: $notificationId")
-        NotificationManagerCompat.from(context).notify(notificationId, notification)
-    }
-
-    private suspend fun trackPushNotificationReceivedEvent(
-        messageId: String,
-        userJourneyId: String?,
-        userJourneyNodeId: String?,
-    ) {
-        eventService.trackEvent(
-            name = NotificationEvent.PUSH_NOTIFICATION_RECEIVED.name,
-            messageId = messageId,
-            userJourneyId = userJourneyId,
-            userJourneyNodeId = userJourneyNodeId,
-        )
-    }
-
-    private suspend fun trackPushNotificationTappedEvent(
-        messageId: String,
-        userJourneyId: String? = null,
-        userJourneyNodeId: String? = null,
-    ) {
-        eventService.trackEvent(
-            name = NotificationEvent.PUSH_NOTIFICATION_TAPPED.name,
-            messageId = messageId,
-            userJourneyId = userJourneyId,
-            userJourneyNodeId = userJourneyNodeId,
-        )
     }
 
     suspend fun handleNotificationReceived(
@@ -211,7 +68,7 @@ internal class NotificationService(
                 if (!shouldTrack) {
                     val eventName = NotificationEvent.PUSH_NOTIFICATION_RECEIVED.name
                     ClixLogger.debug(
-                        "Skipping duplicate $eventName for messageId: ${payload.messageId}"
+                        "Skipping duplicate $eventName for messageId: ${payload.messageId}",
                     )
                     return
                 }
@@ -249,24 +106,6 @@ internal class NotificationService(
         }
     }
 
-    fun setNotificationPreferences(
-        context: Context,
-        enabled: Boolean,
-        categories: List<String>? = null,
-    ) {
-        if (enabled && !hasNotificationPermission(context)) {
-            throw ClixError.NotificationPermissionDenied
-        }
-
-        val settings =
-            NotificationSettings(
-                enabled = enabled,
-                categories = categories,
-                lastUpdated = System.currentTimeMillis(),
-            )
-        storageService.set(settingsKey, settings)
-    }
-
     suspend fun requestNotificationPermission(): Boolean {
         return try {
             if (hasNotificationPermission(context)) {
@@ -285,6 +124,118 @@ internal class NotificationService(
             ClixLogger.error("Failed to request notification permission", e)
             false
         }
+    }
+
+    fun setNotificationPreferences(
+        context: Context,
+        enabled: Boolean,
+        categories: List<String>? = null,
+    ) {
+        if (enabled && !hasNotificationPermission(context)) {
+            throw ClixError.NotificationPermissionDenied
+        }
+
+        val settings =
+            NotificationSettings(
+                enabled = enabled,
+                categories = categories,
+                lastUpdated = System.currentTimeMillis(),
+            )
+        storageService.set(settingsKey, settings)
+    }
+
+    fun getPermissionStatus(): Boolean {
+        return hasNotificationPermission(context)
+    }
+
+    fun reset() {
+        storageService.remove(settingsKey)
+        storageService.remove(lastReceivedMessageIdKey)
+        notificationManager.cancelAll()
+    }
+
+    @RequiresPermission(value = Manifest.permission.POST_NOTIFICATIONS, conditional = true)
+    private suspend fun showNotification(
+        payload: ClixPushNotificationPayload,
+        notificationData: Map<String, Any?>,
+        autoHandleLandingURL: Boolean = true,
+    ) {
+        val intent =
+            Intent(context, NotificationTappedActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                putExtra("messageId", payload.messageId)
+                putExtra("userJourneyId", payload.userJourneyId)
+                putExtra("userJourneyNodeId", payload.userJourneyNodeId)
+                putExtra("landingUrl", payload.landingUrl)
+                putExtra("autoHandleLandingURL", autoHandleLandingURL)
+                notificationData.toJsonString()?.let {
+                    putExtra(NotificationTappedActivity.NOTIFICATION_DATA_EXTRA, it)
+                }
+            }
+
+        val pendingIntent =
+            PendingIntent.getActivity(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+            )
+
+        val builder =
+            NotificationCompat.Builder(context, channelId)
+                .setGroup(groupKey)
+                .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_CHILDREN)
+                .setSmallIcon(launcherIcon)
+                .setContentTitle(payload.title.orEmpty())
+                .setContentText(payload.body.orEmpty())
+                .setContentIntent(pendingIntent)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(payload.body.orEmpty()))
+                .setTicker(payload.body.orEmpty())
+                .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
+
+        accentColor?.let { builder.color = it }
+
+        val bitmap = loadImage(payload.imageUrl)
+        if (bitmap != null) {
+            ClixLogger.debug("Applying BigPictureStyle to notification")
+            builder.setLargeIcon(bitmap)
+        }
+
+        val notification = builder.build()
+
+        val notificationId = payload.messageId.hashCode()
+        ClixLogger.debug("Showing notification with ID: $notificationId for messageId: ${payload.messageId}")
+        notificationManager.notify(notificationId, notification)
+    }
+
+    private suspend fun trackPushNotificationReceivedEvent(
+        messageId: String,
+        userJourneyId: String?,
+        userJourneyNodeId: String?,
+    ) {
+        eventService.trackEvent(
+            name = NotificationEvent.PUSH_NOTIFICATION_RECEIVED.name,
+            messageId = messageId,
+            userJourneyId = userJourneyId,
+            userJourneyNodeId = userJourneyNodeId,
+        )
+    }
+
+    private suspend fun trackPushNotificationTappedEvent(
+        messageId: String,
+        userJourneyId: String? = null,
+        userJourneyNodeId: String? = null,
+    ) {
+        eventService.trackEvent(
+            name = NotificationEvent.PUSH_NOTIFICATION_TAPPED.name,
+            messageId = messageId,
+            userJourneyId = userJourneyId,
+            userJourneyNodeId = userJourneyNodeId,
+        )
     }
 
     private fun recordReceivedMessageId(messageId: String): Boolean {
@@ -307,16 +258,82 @@ internal class NotificationService(
         }
     }
 
-    fun reset() {
-        storageService.remove(settingsKey)
-        storageService.remove(lastReceivedMessageIdKey)
-        notificationManager.cancelAll()
+    private fun createNotificationChannel() {
+        val name = "Clix Notifications"
+        val descriptionText = "Notifications from Clix SDK"
+        val importance = NotificationManager.IMPORTANCE_HIGH
+        val channel =
+            NotificationChannel(channelId, name, importance).apply {
+                description = descriptionText
+                enableVibration(true)
+                enableLights(true)
+            }
+        notificationManager.createNotificationChannel(channel)
     }
 
-    /**
-     * Serializes a map to JSON string. Only supports JSON-compatible primitive types. Uses
-     * org.json.JSONObject for Android compatibility.
-     */
+    private fun getLauncherIcon(): Int {
+        val appInfo =
+            context.packageManager.getApplicationInfo(
+                context.packageName,
+                PackageManager.GET_META_DATA,
+            )
+
+        val launcherIcon = appInfo.icon
+        return if (launcherIcon != 0) {
+            launcherIcon
+        } else {
+            R.drawable.baseline_notifications_24
+        }
+    }
+
+    private fun getAccentColor(): Int? {
+        return try {
+            val typedValue = android.util.TypedValue()
+            val theme = context.theme
+
+            if (theme.resolveAttribute(
+                    android.R.attr.colorPrimary,
+                    typedValue,
+                    true
+                )
+            ) {
+                return typedValue.data
+            }
+
+            null
+        } catch (e: Exception) {
+            ClixLogger.debug("Failed to get accent color from theme: ${e.message}")
+            null
+        }
+    }
+
+    private suspend fun loadImage(src: String?): Bitmap? =
+        withContext(Dispatchers.IO) {
+            ClixLogger.debug("Loading image from URL: $src")
+
+            if (src == null) return@withContext null
+            try {
+                val url = URL(src)
+                val connection =
+                    url.openConnection().apply {
+                        connectTimeout = CONNECT_TIMEOUT_MS.toInt()
+                        readTimeout = READ_TIMEOUT_MS.toInt()
+                    }
+                connection.getInputStream().use { inputStream ->
+                    BitmapFactory.decodeStream(inputStream)
+                }
+            } catch (e: ConnectException) {
+                ClixLogger.warn("Connection error", e)
+                null
+            } catch (e: SocketTimeoutException) {
+                ClixLogger.warn("Read timeout", e)
+                null
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        }
+
     @Suppress("TooGenericExceptionCaught")
     private fun Map<String, Any?>.toJsonString(): String? {
         return try {
@@ -325,10 +342,6 @@ internal class NotificationService(
             ClixLogger.error("Failed to serialize raw notification data", e)
             null
         }
-    }
-
-    fun getPermissionStatus(): Boolean {
-        return hasNotificationPermission(context)
     }
 
     companion object {
