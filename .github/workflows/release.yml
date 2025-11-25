@@ -76,3 +76,5 @@ jobs:
       llm_mode: changed
       base: ''
       head: ''
+    secrets: inherit
+    
