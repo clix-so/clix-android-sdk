@@ -75,7 +75,6 @@ jobs:
     # Do not fail the whole release workflow if llms generation has issues.
     continue-on-error: true
     uses: ./.github/workflows/generate-llms.yml@main
-    secrets: inherit
     with:
       llm_mode: changed
       base: ''
