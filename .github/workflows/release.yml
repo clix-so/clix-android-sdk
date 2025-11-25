@@ -68,3 +68,15 @@ jobs:
           JRELEASER_MAVENCENTRAL_TOKEN: ${{ secrets.JRELEASER_MAVENCENTRAL_TOKEN }}
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew jreleaserDeploy
+
+  generate-llms:
+    name: Generate llms.txt after release
+    needs: release
+    # Do not fail the whole release workflow if llms generation has issues.
+    continue-on-error: true
+    uses: ./.github/workflows/generate-llms.yml@main
+    secrets: inherit
+    with:
+      llm_mode: changed
+      base: ''
+      head: ''
