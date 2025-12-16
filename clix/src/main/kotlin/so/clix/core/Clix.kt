@@ -38,9 +38,8 @@ object Clix {
 
     // Private implementation
     private val coroutineContext by lazy { SupervisorJob() }
-    private val configKey = "clix_config"
-
     private object InitializeLock
+    private const val CONFIG_KEY = "clix_config"
 
     @Volatile private var isInitialized = false
 
@@ -82,7 +81,7 @@ object Clix {
                 notificationService = NotificationService(appContext, storageService, eventService)
 
                 // Save config for recovery when app is killed
-                storageService.set(configKey, config)
+                storageService.set(CONFIG_KEY, config)
 
                 val deviceId = deviceService.getCurrentDeviceId()
                 val token = tokenService.getCurrentToken() ?: ""
@@ -271,7 +270,7 @@ object Clix {
             try {
                 val appContext = context.applicationContext
                 val storageService = StorageService(appContext)
-                val savedConfig = storageService.get<ClixConfig>(configKey)
+                val savedConfig = storageService.get<ClixConfig>(CONFIG_KEY)
 
                 if (savedConfig == null) {
                     ClixLogger.warn(
