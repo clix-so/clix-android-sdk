@@ -31,6 +31,15 @@ open class ClixMessagingService : FirebaseMessagingService() {
         message.data.isNotEmpty().let { ClixLogger.debug("Message data payload: ${message.data}") }
         message.notification?.let { ClixLogger.debug("Message notification body: ${it.body}") }
 
+        // Ensure SDK is initialized (handles case when app was killed)
+        if (!Clix.initialize(applicationContext)) {
+            ClixLogger.error(
+                "SDK not initialized and cannot auto-initialize. " +
+                    "Push notification will be ignored."
+            )
+            return
+        }
+
         val notificationData: Map<String, Any?> = message.data.mapValues { it.value }
         val payload = ClixPushNotificationPayload.decode(notificationData)
 
@@ -50,6 +59,16 @@ open class ClixMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         ClixLogger.debug("New token received $token")
+
+        // Ensure SDK is initialized (handles case when app was killed)
+        if (!Clix.initialize(applicationContext)) {
+            ClixLogger.warn(
+                "SDK not initialized and cannot auto-initialize. " +
+                    "New FCM token will not be processed."
+            )
+            return
+        }
+
         Clix.coroutineScope.launch {
             try {
                 Clix.tokenService.saveToken(token)

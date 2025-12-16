@@ -38,6 +38,10 @@ object Clix {
 
     // Private implementation
     private val COROUTINE_CONTEXT by lazy { SupervisorJob() }
+    private val initializeLock = Any()
+    private const val CONFIG_STORAGE_KEY = "clix_config"
+
+    @Volatile private var isInitialized = false
 
     // Internal services
     internal lateinit var environment: ClixEnvironment
@@ -60,47 +64,59 @@ object Clix {
      */
     @JvmStatic
     fun initialize(context: Context, config: ClixConfig) {
-        try {
-            ClixLogger.setLogLevel(config.logLevel)
-            val appContext = context.applicationContext
-            require(context == appContext) { "Context must be application context." }
-            storageService = StorageService(appContext)
-            tokenService = TokenService(storageService)
-            deviceService = DeviceService(storageService)
-            eventService = EventService()
-            notificationService = NotificationService(appContext, storageService, eventService)
-
-            val deviceId = deviceService.getCurrentDeviceId()
-            val token = tokenService.getCurrentToken() ?: ""
-
-            this.environment = ClixEnvironment(context, config, deviceId, token)
-            ClixLogger.debug(
-                "Clix initialized with environment: ${Json.encodeToString(environment)}"
-            )
-
-            CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    val finalToken =
-                        if (token.isNotEmpty()) {
-                            ClixLogger.debug("Using existing token: $token")
-                            token
-                        } else {
-                            ClixLogger.debug("Fetching new FCM token")
-                            val newToken = FirebaseMessaging.getInstance().token.await()
-                            ClixLogger.debug("New FCM token received: $newToken")
-                            tokenService.saveToken(newToken)
-                            newToken
-                        }
-
-                    ClixLogger.debug("Upserting token during initialization: $finalToken")
-                    deviceService.upsertToken(finalToken)
-                } catch (e: Exception) {
-                    ClixLogger.error("Failed to fetch or upsert FCM token", e)
-                    ClixNotification.handleFcmTokenError(e)
-                }
+        synchronized(initializeLock) {
+            if (isInitialized) {
+                ClixLogger.debug("Clix SDK already initialized, skipping")
+                return
             }
-        } catch (e: Exception) {
-            ClixLogger.error("Failed to initialize Clix SDK", e)
+
+            try {
+                ClixLogger.setLogLevel(config.logLevel)
+                val appContext = context.applicationContext
+                require(context === appContext) { "Context must be application context." }
+                storageService = StorageService(appContext)
+                tokenService = TokenService(storageService)
+                deviceService = DeviceService(storageService)
+                eventService = EventService()
+                notificationService = NotificationService(appContext, storageService, eventService)
+
+                // Save config for recovery when app is killed
+                storageService.set(CONFIG_STORAGE_KEY, config)
+
+                val deviceId = deviceService.getCurrentDeviceId()
+                val token = tokenService.getCurrentToken() ?: ""
+
+                this.environment = ClixEnvironment(context, config, deviceId, token)
+                isInitialized = true
+                ClixLogger.debug(
+                    "Clix initialized with environment: ${Json.encodeToString(environment)}"
+                )
+
+                coroutineScope.launch(Dispatchers.IO) {
+                    try {
+                        val finalToken =
+                            if (token.isNotEmpty()) {
+                                ClixLogger.debug("Using existing token: $token")
+                                token
+                            } else {
+                                ClixLogger.debug("Fetching new FCM token")
+                                val newToken = FirebaseMessaging.getInstance().token.await()
+                                ClixLogger.debug("New FCM token received: $newToken")
+                                tokenService.saveToken(newToken)
+                                newToken
+                            }
+
+                        ClixLogger.debug("Upserting token during initialization: $finalToken")
+                        deviceService.upsertToken(finalToken)
+                    } catch (e: Exception) {
+                        ClixLogger.error("Failed to fetch or upsert FCM token", e)
+                        ClixNotification.handleFcmTokenError(e)
+                    }
+                }
+            } catch (e: Exception) {
+                isInitialized = false
+                ClixLogger.error("Failed to initialize Clix SDK", e)
+            }
         }
     }
 
@@ -227,6 +243,50 @@ object Clix {
         } catch (e: Exception) {
             ClixLogger.error("Failed to get device ID", e)
             return ""
+        }
+    }
+
+    /**
+     * Initializes the SDK using stored configuration.
+     *
+     * This is called internally when a push notification is received and the app process was
+     * killed. It attempts to restore SDK state using the previously stored configuration. This
+     * matches the iOS SDK pattern of `initialize(projectId:)`.
+     *
+     * @param context The application context (typically from a Service).
+     * @return true if SDK is initialized (either already or successfully restored), false
+     *   otherwise.
+     */
+    internal fun initialize(context: Context): Boolean {
+        if (isInitialized) {
+            return true
+        }
+
+        synchronized(initializeLock) {
+            if (isInitialized) {
+                return true
+            }
+
+            try {
+                val appContext = context.applicationContext
+                val tempStorage = StorageService(appContext)
+                val savedConfig = tempStorage.get<ClixConfig>(CONFIG_STORAGE_KEY)
+
+                if (savedConfig == null) {
+                    ClixLogger.warn(
+                        "Cannot auto-initialize SDK: no saved configuration found. " +
+                            "Ensure Clix.initialize() is called in Application.onCreate()"
+                    )
+                    return false
+                }
+
+                ClixLogger.debug("Auto-initializing SDK from saved configuration")
+                initialize(appContext, savedConfig)
+                return isInitialized
+            } catch (e: Exception) {
+                ClixLogger.error("Failed to auto-initialize SDK", e)
+                return false
+            }
         }
     }
 }

@@ -19,7 +19,7 @@ Add the dependency to your app's `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-  implementation("so.clix:clix-android-sdk:1.3.0")
+  implementation("so.clix:clix-android-sdk:1.3.1")
 }
 ```
 
@@ -189,7 +189,8 @@ class MyApplication : Application() {
 }
 ```
 
-**Important:** All `Clix.Notification` methods must be called **after** `Clix.initialize()`. Calling them before initialization will result in an error.
+**Important:** All `Clix.Notification` methods must be called **after** `Clix.initialize()`. Calling them before
+initialization will result in an error.
 
 ##### About `notificationData`
 
@@ -321,11 +322,13 @@ wait for SDK initialization to complete.
 
 ### Push Permission Status Not Updating
 
-The `autoRequestPermission` parameter defaults to **`false`**. If you're not using automatic permission requests, you must manually notify Clix when users grant or deny push permissions.
+The `autoRequestPermission` parameter defaults to **`false`**. If you're not using automatic permission requests, you
+must manually notify Clix when users grant or deny push permissions.
 
 #### Update Permission Status
 
-When using `autoRequestPermission = false` (the default), call `Clix.Notification.setPermissionGranted()` after requesting push permissions in your app:
+When using `autoRequestPermission = false` (the default), call `Clix.Notification.setPermissionGranted()` after
+requesting push permissions in your app:
 
 ```kotlin
 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
