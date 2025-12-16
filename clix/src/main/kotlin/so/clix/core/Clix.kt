@@ -38,7 +38,9 @@ object Clix {
 
     // Private implementation
     private val coroutineContext by lazy { SupervisorJob() }
+
     private object InitializeLock
+
     private const val CONFIG_KEY = "clix_config"
 
     @Volatile private var isInitialized = false
