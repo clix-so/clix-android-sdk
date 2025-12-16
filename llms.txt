@@ -1,15 +1,15 @@
 <!-- repo: clix-so/clix-android-sdk -->
 <!-- ref: main -->
-<!-- commit: c51f46995092cddf120eb00d05e22c38f3e746a2 -->
-<!-- generated_at: 2025-11-25T05:20:26Z -->
+<!-- commit: d8e4f938c5172b1e12d3148937e25b9c571db593 -->
+<!-- generated_at: 2025-12-16T09:08:48Z -->
 # Platform: Android
 
 ## /
 - [Build.gradle](https://raw.githubusercontent.com/clix-so/clix-android-sdk/main/build.gradle.kts): Top-level Gradle build script configuring shared Android/Kotlin/ktfmt/GMS plugins (without applying them) and enforcing a specific `commons-compress` version via the `classpath` configuration’s resolution strategy for all modules in the SDK.
 - [Settings.gradle](https://raw.githubusercontent.com/clix-so/clix-android-sdk/main/settings.gradle.kts): Defines Gradle plugin and dependency repositories, enforces centralized repository resolution, sets the root project name `clix-android-sdk`, and includes the `:clix` SDK module and `:samples:basic-app` sample app modules in the build.
 - [Gradle](https://raw.githubusercontent.com/clix-so/clix-android-sdk/main/gradle.properties): Defines project-wide Gradle configuration for the SDK, including JVM args, AndroidX usage, Kotlin code style, and non-transitive R class behavior that affects build performance, resource namespacing, and compatibility across all modules.
-- [Readme](https://raw.githubusercontent.com/clix-so/clix-android-sdk/main/README.md): README for Clix Android SDK: explains initialization via Clix.initialize(ClixConfig), user/event APIs (setUserId/setUserProperty/trackEvent/getDeviceId), FCM push integration (Clix.
-- [Changelog](https://raw.githubusercontent.com/clix-so/clix-android-sdk/main/CHANGELOG.md): Changelog enumerating v1.0.
+- [Readme](https://raw.githubusercontent.com/clix-so/clix-android-sdk/main/README.md): README for Clix Android SDK: documents initialization with Clix.initialize(ClixConfig), Firebase/FCM setup (min API 26), user management (setUserId/setUserProperty), event tracking (Clix.
+- [Changelog](https://raw.githubusercontent.com/clix-so/clix-android-sdk/main/CHANGELOG.md): Changelog documenting release history, bugfixes and feature additions (ClixConfig initialization, coroutine-based core, user APIs setUserId/setUserProperty(s), Clix.Notification.
 - [License](https://raw.githubusercontent.com/clix-so/clix-android-sdk/main/LICENSE): Defines the SDK’s licensing terms as a modified MIT license, permitting use, modification, and distribution only when integrated with Clix services and requiring inclusion of copyright and permission notices in all substantial copies.
 
 ## clix
@@ -19,7 +19,7 @@
 - [Clixnotification](https://raw.githubusercontent.com/clix-so/clix-android-sdk/main/clix/src/main/kotlin/so/clix/core/ClixNotification.kt): Singleton ClixNotification configures push behavior and handlers (configure, onMessage, onBackgroundMessage, onNotificationOpened, onFcmTokenError) and exposes token/permission APIs (getToken, deleteToken, requestPermission, getPermissionStatus, setPermissionGranted) while delegating to Clix.* services, launching coroutines, updating server, and starting activities to open landing URLs on taps.
 - [Clixenvironment](https://raw.githubusercontent.com/clix-so/clix-android-sdk/main/clix/src/main/kotlin/so/clix/core/ClixEnvironment.kt): Serializable internal ClixEnvironment constructs and serializes ClixDevice from Context/config/deviceId/token (collecting appVersion, advertising ID via reflection, push permission, timezone/locale), exposes synchronized getDevice/setDevice and companion helpers getAppVersion/getAdId/getIsPushPermissionGranted.
 - [Clixconfig](https://raw.githubusercontent.com/clix-so/clix-android-sdk/main/clix/src/main/kotlin/so/clix/core/ClixConfig.kt): Defines the serializable `ClixConfig` data class that centralizes SDK initialization settings (project ID, API key, API endpoint, `ClixLogLevel`, and extra HTTP headers) used to configure Clix network calls and logging behavior.
-- [Clix](https://raw.githubusercontent.com/clix-so/clix-android-sdk/main/clix/src/main/kotlin/so/clix/core/Clix.kt): Singleton SDK entrypoint that initializes Storage/Device/Token/Event/Notification services, fetches and upserts FCM tokens using coroutines, exposes Notification and APIs (initialize, set/remove userId, set/remove user properties, trackEvent, setLogLevel, getDeviceId), and logs errors.
+- [Clix](https://raw.githubusercontent.com/clix-so/clix-android-sdk/main/clix/src/main/kotlin/so/clix/core/Clix.kt): Singleton SDK entrypoint managing initialization (including auto-recovery from stored config), async FCM token fetch/upsert, device/user property and event APIs, Notification surface, logging control and deviceId retrieval; depends on Storage/Device/Token/Event/Notification services, FirebaseMessaging, coroutines, and ClixLogger.
 
 ## clix/src/main/kotlin/so/clix/models
 - [Notificationcontext](https://raw.githubusercontent.com/clix-so/clix-android-sdk/main/clix/src/main/kotlin/so/clix/models/NotificationContext.kt): Internal data class NotificationContext encapsulating notificationData: Map<String, Any?> and autoOpenLandingURL flag (default true), used by notification-handling flows to decide whether to auto-open landing URLs; module-internal.
@@ -30,7 +30,7 @@
 
 ## clix/src/main/kotlin/so/clix/notification
 - [Permissionactivity](https://raw.githubusercontent.com/clix-so/clix-android-sdk/main/clix/src/main/kotlin/so/clix/notification/PermissionActivity.kt): Internal transparent PermissionActivity that requests POST_NOTIFICATIONS on Android TIRAMISU+, persists pending/result/timestamp in Clix.storageService to recover after restarts, exposes internal suspend requestPermission(context) which starts the activity, awaits result via a synchronized callback, and enforces a 5s timeout.
-- [Clixmessagingservice](https://raw.githubusercontent.com/clix-so/clix-android-sdk/main/clix/src/main/kotlin/so/clix/notification/ClixMessagingService.kt): Firebase MessagingService implementation that parses incoming RemoteMessage.data into ClixPushNotificationPayload and asynchronously invokes Clix.
+- [Clixmessagingservice](https://raw.githubusercontent.com/clix-so/clix-android-sdk/main/clix/src/main/kotlin/so/clix/notification/ClixMessagingService.kt): Firebase MessagingService that auto-initializes Clix, parses FCM RemoteMessage into ClixPushNotificationPayload in onMessageReceived and dispatches to Clix.Notification via coroutine, and handles onNewToken by saving/upserting tokens (Clix.
 - [Notificationtappedactivity](https://raw.githubusercontent.com/clix-so/clix-android-sdk/main/clix/src/main/kotlin/so/clix/notification/NotificationTappedActivity.kt): Manifest-registered Activity that handles notification tap intents by extracting extras (messageId, landingUrl, journey IDs, autoHandleLandingURL, JSON data), deserializing data, and invoking ClixNotification.handleNotificationTapped (with NotificationContext and ClixPushNotificationPayload), then finishes.
 
 ## clix/src/main/kotlin/so/clix/services
