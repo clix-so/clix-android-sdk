@@ -248,12 +248,13 @@ object Clix {
     /**
      * Initializes the SDK using stored configuration.
      *
-     * This is called internally when a push notification is received and the app process
-     * was killed. It attempts to restore SDK state using the previously stored configuration.
-     * This matches the iOS SDK pattern of `initialize(projectId:)`.
+     * This is called internally when a push notification is received and the app process was
+     * killed. It attempts to restore SDK state using the previously stored configuration. This
+     * matches the iOS SDK pattern of `initialize(projectId:)`.
      *
      * @param context The application context (typically from a Service).
-     * @return true if SDK is initialized (either already or successfully restored), false otherwise.
+     * @return true if SDK is initialized (either already or successfully restored), false
+     *   otherwise.
      */
     internal fun initialize(context: Context): Boolean {
         if (isInitialized) {
