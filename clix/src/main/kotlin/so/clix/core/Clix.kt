@@ -73,7 +73,7 @@ object Clix {
             try {
                 ClixLogger.setLogLevel(config.logLevel)
                 val appContext = context.applicationContext
-                require(context == appContext) { "Context must be application context." }
+                require(context === appContext) { "Context must be application context." }
                 storageService = StorageService(appContext)
                 tokenService = TokenService(storageService)
                 deviceService = DeviceService(storageService)
@@ -92,7 +92,7 @@ object Clix {
                     "Clix initialized with environment: ${Json.encodeToString(environment)}"
                 )
 
-                CoroutineScope(Dispatchers.IO).launch {
+                coroutineScope.launch(Dispatchers.IO) {
                     try {
                         val finalToken =
                             if (token.isNotEmpty()) {
@@ -114,6 +114,7 @@ object Clix {
                     }
                 }
             } catch (e: Exception) {
+                isInitialized = false
                 ClixLogger.error("Failed to initialize Clix SDK", e)
             }
         }
