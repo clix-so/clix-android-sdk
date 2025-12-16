@@ -73,6 +73,7 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.lifecycle.process)
     implementation(libs.bundles.coroutines)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.firebase.messaging.ktx)

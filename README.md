@@ -19,7 +19,7 @@ Add the dependency to your app's `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-  implementation("so.clix:clix-android-sdk:1.3.1")
+  implementation("so.clix:clix-android-sdk:1.3.2")
 }
 ```
 
