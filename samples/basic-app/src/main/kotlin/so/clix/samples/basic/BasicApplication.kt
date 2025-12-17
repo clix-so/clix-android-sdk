@@ -26,16 +26,10 @@ class BasicApplication : Application() {
 
         instance = this
 
-        Clix.initialize(
-            this,
-            ClixConfig(
-                projectId = ClixConfiguration.PROJECT_ID,
-                apiKey = ClixConfiguration.API_KEY,
-                endpoint = ClixConfiguration.ENDPOINT,
-                logLevel = ClixConfiguration.LOG_LEVEL,
-                extraHeaders = ClixConfiguration.EXTRA_HEADERS
-            ),
-        )
+        // Initialize ClixConfiguration from JSON file
+        ClixConfiguration.initialize(this)
+
+        Clix.initialize(this, ClixConfiguration.config)
 
         Clix.Notification.configure(autoRequestPermission = true)
 
