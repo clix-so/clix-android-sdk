@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 internal data class Token(val token: String, val timestamp: Long = System.currentTimeMillis())
 
 internal class TokenService(private val storageService: StorageService) {
-    private val currentTokenKey = "clix_current_token"
-    private val previousTokensKey = "clix_previous_tokens"
+    private val currentTokenKey = "clix_current_push_token"
+    private val previousTokensKey = "clix_push_tokens"
 
     fun getCurrentToken(): String? = storageService.get<Token>(currentTokenKey)?.token
 

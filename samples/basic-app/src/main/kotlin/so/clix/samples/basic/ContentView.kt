@@ -113,11 +113,11 @@ fun ContentView() {
             Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 32.dp)) {
                 InfoTextRow(
                     label = stringResource(R.string.clix_project_id),
-                    value = ClixConfiguration.PROJECT_ID,
+                    value = ClixConfiguration.config.projectId,
                 )
                 InfoTextRow(
                     label = stringResource(R.string.api_key),
-                    value = ClixConfiguration.API_KEY,
+                    value = ClixConfiguration.config.apiKey,
                 )
                 InfoTextRow(
                     label = stringResource(R.string.device_id),

@@ -50,7 +50,7 @@ class TokenServiceTest {
     fun `it should return token when current token is found`() {
         // Given
         val token = "test-token"
-        storageService.set("clix_current_token", Token(token))
+        storageService.set("clix_current_push_token", Token(token))
 
         // When
         val result = tokenService.getCurrentToken()
@@ -75,7 +75,7 @@ class TokenServiceTest {
     fun `it should return previous tokens when found`() {
         // Given
         val previousTokens = listOf("token1", "token2")
-        storageService.set("clix_previous_tokens", previousTokens)
+        storageService.set("clix_push_tokens", previousTokens)
 
         // When
         val result = tokenService.getPreviousTokens()
@@ -92,8 +92,8 @@ class TokenServiceTest {
         val previousTokens = listOf("token1", "token2")
 
         // Set up initial state
-        storageService.set("clix_current_token", Token(currentToken))
-        storageService.set("clix_previous_tokens", previousTokens)
+        storageService.set("clix_current_push_token", Token(currentToken))
+        storageService.set("clix_push_tokens", previousTokens)
 
         // When
         tokenService.saveToken(newToken)
@@ -114,7 +114,7 @@ class TokenServiceTest {
         val previousTokens = listOf("token1", "token2")
 
         // Set up initial state
-        storageService.set("clix_previous_tokens", previousTokens)
+        storageService.set("clix_push_tokens", previousTokens)
 
         // When
         tokenService.saveToken(newToken)
@@ -135,8 +135,8 @@ class TokenServiceTest {
         val previousTokens = listOf("token1", "token2", "token3", "token4", "token5")
 
         // Set up initial state
-        storageService.set("clix_current_token", Token(currentToken))
-        storageService.set("clix_previous_tokens", previousTokens)
+        storageService.set("clix_current_push_token", Token(currentToken))
+        storageService.set("clix_push_tokens", previousTokens)
 
         // When
         tokenService.saveToken(newToken)
@@ -156,8 +156,8 @@ class TokenServiceTest {
         val previousTokens = listOf("token1", "token2")
 
         // Set up initial state
-        storageService.set("clix_current_token", Token(token))
-        storageService.set("clix_previous_tokens", previousTokens)
+        storageService.set("clix_current_push_token", Token(token))
+        storageService.set("clix_push_tokens", previousTokens)
 
         // When
         tokenService.clearTokens()
@@ -177,8 +177,8 @@ class TokenServiceTest {
         val previousTokens = listOf("token1", "token2")
 
         // Set up initial state
-        storageService.set("clix_current_token", Token(token))
-        storageService.set("clix_previous_tokens", previousTokens)
+        storageService.set("clix_current_push_token", Token(token))
+        storageService.set("clix_push_tokens", previousTokens)
 
         // When
         tokenService.reset()

@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2025-12-17
+
+### Changed
+
+- **Push Notifications**
+  - `onMessage` handler now called only when app is in foreground
+  - `onBackgroundMessage` handler now called only when app is in background or terminated
+
+- **Core SDK**
+  - Improved internal variable naming conventions and storage key consistency
+
 ## [1.3.1] - 2025-12-16
 
 ### Fixed

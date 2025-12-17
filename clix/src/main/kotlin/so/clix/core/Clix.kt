@@ -37,9 +37,11 @@ object Clix {
     @JvmField val Notification = ClixNotification
 
     // Private implementation
-    private val COROUTINE_CONTEXT by lazy { SupervisorJob() }
-    private val initializeLock = Any()
-    private const val CONFIG_STORAGE_KEY = "clix_config"
+    private val coroutineContext by lazy { SupervisorJob() }
+
+    private object InitializeLock
+
+    private const val CONFIG_KEY = "clix_config"
 
     @Volatile private var isInitialized = false
 
@@ -50,7 +52,7 @@ object Clix {
     internal lateinit var eventService: EventService
     internal lateinit var tokenService: TokenService
     internal lateinit var notificationService: NotificationService
-    internal val coroutineScope = CoroutineScope(COROUTINE_CONTEXT)
+    internal val coroutineScope = CoroutineScope(coroutineContext)
 
     internal const val VERSION = BuildConfig.VERSION
 
@@ -64,7 +66,7 @@ object Clix {
      */
     @JvmStatic
     fun initialize(context: Context, config: ClixConfig) {
-        synchronized(initializeLock) {
+        synchronized(InitializeLock) {
             if (isInitialized) {
                 ClixLogger.debug("Clix SDK already initialized, skipping")
                 return
@@ -81,7 +83,7 @@ object Clix {
                 notificationService = NotificationService(appContext, storageService, eventService)
 
                 // Save config for recovery when app is killed
-                storageService.set(CONFIG_STORAGE_KEY, config)
+                storageService.set(CONFIG_KEY, config)
 
                 val deviceId = deviceService.getCurrentDeviceId()
                 val token = tokenService.getCurrentToken() ?: ""
@@ -262,15 +264,15 @@ object Clix {
             return true
         }
 
-        synchronized(initializeLock) {
+        synchronized(InitializeLock) {
             if (isInitialized) {
                 return true
             }
 
             try {
                 val appContext = context.applicationContext
-                val tempStorage = StorageService(appContext)
-                val savedConfig = tempStorage.get<ClixConfig>(CONFIG_STORAGE_KEY)
+                val storageService = StorageService(appContext)
+                val savedConfig = storageService.get<ClixConfig>(CONFIG_KEY)
 
                 if (savedConfig == null) {
                     ClixLogger.warn(

@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.core.net.toUri
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ProcessLifecycleOwner
 import kotlin.jvm.Volatile
 import kotlinx.coroutines.launch
 import so.clix.models.ClixPushNotificationPayload
@@ -227,18 +229,34 @@ object ClixNotification {
         notificationData: Map<String, Any?>,
         payload: ClixPushNotificationPayload,
     ) {
-        val handler = messageHandler
-        if (handler != null) {
-            val shouldDisplay =
+        val isInForeground = isAppInForeground()
+
+        if (isInForeground) {
+            // Foreground: call onMessage handler (can suppress notification)
+            val handler = messageHandler
+            if (handler != null) {
+                val shouldDisplay =
+                    try {
+                        handler(notificationData)
+                    } catch (e: Exception) {
+                        ClixLogger.error("Foreground message handler failed", e)
+                        true
+                    }
+                if (!shouldDisplay) {
+                    ClixLogger.debug(
+                        "Foreground handler suppressed notification for ${payload.messageId}"
+                    )
+                    return
+                }
+            }
+        } else {
+            // Background: call onBackgroundMessage handler (notification always displayed)
+            backgroundMessageHandler?.let { handler ->
                 try {
                     handler(notificationData)
                 } catch (e: Exception) {
-                    ClixLogger.error("Message handler failed", e)
-                    true
+                    ClixLogger.error("Background message handler failed", e)
                 }
-            if (!shouldDisplay) {
-                ClixLogger.debug("Message handler suppressed payload ${payload.messageId}")
-                return
             }
         }
 
@@ -247,6 +265,15 @@ object ClixNotification {
             notificationData = notificationData,
             autoHandleLandingURL = autoHandleLandingURL,
         )
+    }
+
+    private fun isAppInForeground(): Boolean {
+        return try {
+            ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
+        } catch (e: Exception) {
+            ClixLogger.warn("Failed to determine app foreground state, assuming background", e)
+            false
+        }
     }
 
     internal fun handleNotificationTapped(

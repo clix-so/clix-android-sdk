@@ -1,12 +1,27 @@
 package so.clix.samples.basic
 
+import android.content.Context
+import kotlinx.serialization.json.Json
+import so.clix.core.ClixConfig
 import so.clix.utils.logging.ClixLogLevel
 
 object ClixConfiguration {
-    const val PROJECT_ID = ""
-    const val API_KEY = ""
-    const val ENDPOINT = ""
-    val LOG_LEVEL = ClixLogLevel.DEBUG
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
 
-    val EXTRA_HEADERS: Map<String, String> = mapOf()
+    private val logLevel: ClixLogLevel = ClixLogLevel.DEBUG
+
+    lateinit var config: ClixConfig
+        private set
+
+    fun initialize(context: Context) {
+        config =
+            json
+                .decodeFromString<ClixConfig>(
+                    context.assets.open("ClixConfig.json").bufferedReader().readText()
+                )
+                .copy(logLevel = logLevel)
+    }
 }
