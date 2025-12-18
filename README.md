@@ -1,6 +1,7 @@
 # Clix Android SDK
 
-Clix Android SDK is a powerful tool for managing push notifications and user events in your Android application. It
+Clix Android SDK is a powerful tool for managing push notifications and user events in your Android
+application. It
 provides a simple and intuitive interface for user engagement and analytics.
 
 ## Installation
@@ -19,7 +20,7 @@ Add the dependency to your app's `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-  implementation("so.clix:clix-android-sdk:1.3.2")
+  implementation("so.clix:clix-android-sdk:1.3.3")
 }
 ```
 
@@ -38,7 +39,8 @@ dependencies {
 
 ### Initialization
 
-Initialize the SDK with a ClixConfig object. The config is required and contains your project settings.
+Initialize the SDK with a ClixConfig object. The config is required and contains your project
+settings.
 
 ```kotlin
 import so.clix.core.Clix
@@ -189,15 +191,20 @@ class MyApplication : Application() {
 }
 ```
 
-**Important:** All `Clix.Notification` methods must be called **after** `Clix.initialize()`. Calling them before
+**Important:** All `Clix.Notification` methods must be called **after** `Clix.initialize()`. Calling
+them before
 initialization will result in an error.
 
 ##### About `notificationData`
 
-- The `notificationData` map is the full FCM payload as delivered to the device; it mirrors iOS’s `userInfo` dictionary.
-- Every Clix notification callback (`onMessage`, `onBackgroundMessage`, `onNotificationOpened`) passes this map through
-  untouched, so you can inspect both the serialized `"clix"` block and any custom keys your backend adds.
-- `notificationData["clix"]` holds the Clix metadata JSON, while all other keys represent app-specific data.
+- The `notificationData` map is the full FCM payload as delivered to the device; it mirrors iOS’s
+  `userInfo` dictionary.
+- Every Clix notification callback (`onMessage`, `onBackgroundMessage`, `onNotificationOpened`)
+  passes this map through
+  untouched, so you can inspect both the serialized `"clix"` block and any custom keys your backend
+  adds.
+- `notificationData["clix"]` holds the Clix metadata JSON, while all other keys represent
+  app-specific data.
 
 Or request permission manually:
 
@@ -246,7 +253,8 @@ class MyMessagingService : ClixMessagingService() {
 - Push notification event tracking
 - Duplicate notification prevention
 - Deep linking support (automatic landing URL handling)
-- Use `Clix.Notification.configure(autoHandleLandingURL = false)` to disable automatic landing URL handling
+- Use `Clix.Notification.configure(autoHandleLandingURL = false)` to disable automatic landing URL
+  handling
 
 #### Deep Link Handling
 
@@ -315,19 +323,22 @@ try {
 
 ## Thread Safety
 
-The SDK is thread-safe and all operations can be called from any thread. Coroutine-based operations will automatically
+The SDK is thread-safe and all operations can be called from any thread. Coroutine-based operations
+will automatically
 wait for SDK initialization to complete.
 
 ## Troubleshooting
 
 ### Push Permission Status Not Updating
 
-The `autoRequestPermission` parameter defaults to **`false`**. If you're not using automatic permission requests, you
+The `autoRequestPermission` parameter defaults to **`false`**. If you're not using automatic
+permission requests, you
 must manually notify Clix when users grant or deny push permissions.
 
 #### Update Permission Status
 
-When using `autoRequestPermission = false` (the default), call `Clix.Notification.setPermissionGranted()` after
+When using `autoRequestPermission = false` (the default), call
+`Clix.Notification.setPermissionGranted()` after
 requesting push permissions in your app:
 
 ```kotlin
@@ -336,7 +347,11 @@ if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 }
 
 // In your permission result callback
-override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+override fun onRequestPermissionsResult(
+  requestCode: Int,
+  permissions: Array<String>,
+  grantResults: IntArray
+) {
   if (requestCode == PERMISSION_REQUEST_CODE) {
     val granted = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
 
@@ -376,7 +391,8 @@ If push notifications aren't working, verify:
 1. ✅ `google-services.json` is added to your app module
 2. ✅ Firebase Cloud Messaging is properly configured
 3. ✅ `ClixMessagingService` is declared in `AndroidManifest.xml`
-4. ✅ `Clix.Notification.setPermissionGranted()` is called after requesting permissions (when not using auto-request)
+4. ✅ `Clix.Notification.setPermissionGranted()` is called after requesting permissions (when not
+   using auto-request)
 5. ✅ Testing on a real device or emulator with Google Play Services
 6. ✅ Debug logs show "New token received" message
 7. ✅ Use `onFcmTokenError()` handler to catch token registration errors
@@ -389,7 +405,8 @@ If you continue to experience issues:
 2. Check Logcat for Clix log messages
 3. Verify your device appears in the Clix console Users page
 4. Check if `push_token` field is populated for your device
-5. Create an issue on [GitHub](https://github.com/clix-so/clix-android-sdk/issues) with logs and configuration details
+5. Create an issue on [GitHub](https://github.com/clix-so/clix-android-sdk/issues) with logs and
+   configuration details
 
 ## Proguard
 
@@ -410,5 +427,6 @@ See the full release history and changes in the [CHANGELOG.md](CHANGELOG.md) fil
 
 ## Contributing
 
-We welcome contributions! Please read the [CONTRIBUTING.md](CONTRIBUTING.md) guide before submitting issues or pull
+We welcome contributions! Please read the [CONTRIBUTING.md](CONTRIBUTING.md) guide before submitting
+issues or pull
 requests.

@@ -38,7 +38,7 @@ android {
 
 dependencies {
     implementation(project(":clix"))
-    //    implementation("so.clix:clix-android-sdk:1.3.2")
+    //    implementation("so.clix:clix-android-sdk:1.3.3")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity.compose)
