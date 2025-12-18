@@ -177,7 +177,7 @@ internal class NotificationService(
                 .setStyle(NotificationCompat.BigTextStyle().bigText(payload.body.orEmpty()))
                 .setTicker(payload.body.orEmpty())
                 .setAutoCancel(true)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setCategory(NotificationCompat.CATEGORY_MESSAGE)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setDefaults(NotificationCompat.DEFAULT_ALL)
@@ -254,6 +254,7 @@ internal class NotificationService(
                 description = descriptionText
                 enableVibration(true)
                 enableLights(true)
+                setShowBadge(true)
             }
         notificationManager.createNotificationChannel(channel)
     }

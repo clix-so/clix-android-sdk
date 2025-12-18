@@ -53,7 +53,8 @@ object ClixNotification {
         }
 
         ClixLogger.debug(
-            "ClixNotification.configure(autoRequestPermission: $autoRequestPermission, autoHandleLandingURL: $autoHandleLandingURL)"
+            "ClixNotification.configure(autoRequestPermission: $autoRequestPermission, " +
+                "autoHandleLandingURL: $autoHandleLandingURL)"
         )
 
         this.autoHandleLandingURL = autoHandleLandingURL
