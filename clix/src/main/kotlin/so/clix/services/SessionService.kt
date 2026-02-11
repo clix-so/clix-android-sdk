@@ -17,10 +17,6 @@ internal class SessionService(
     sessionTimeoutMs: Int,
 ) : DefaultLifecycleObserver {
 
-    companion object {
-        private const val LAST_ACTIVITY_KEY = "clix_session_last_activity"
-    }
-
     private val effectiveTimeoutMs = maxOf(sessionTimeoutMs, 5000)
 
     @Volatile private var pendingMessageId: String? = null
@@ -80,5 +76,9 @@ internal class SessionService(
 
     private fun updateLastActivity() {
         storageService.set(LAST_ACTIVITY_KEY, System.currentTimeMillis())
+    }
+
+    companion object {
+        private const val LAST_ACTIVITY_KEY = "clix_session_last_activity"
     }
 }
