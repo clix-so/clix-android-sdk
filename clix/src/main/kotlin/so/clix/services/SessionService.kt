@@ -8,7 +8,7 @@ import so.clix.core.Clix
 import so.clix.utils.logging.ClixLogger
 
 internal enum class SessionEvent {
-    SESSION_START,
+    SESSION_START
 }
 
 internal class SessionService(
@@ -23,8 +23,7 @@ internal class SessionService(
 
     private val effectiveTimeoutMs = maxOf(sessionTimeoutMs, 5000)
 
-    @Volatile
-    private var pendingMessageId: String? = null
+    @Volatile private var pendingMessageId: String? = null
 
     fun start() {
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)

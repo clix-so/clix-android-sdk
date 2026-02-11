@@ -83,7 +83,8 @@ object Clix {
                 deviceService = DeviceService(storageService)
                 eventService = EventService()
                 notificationService = NotificationService(appContext, storageService, eventService)
-                sessionService = SessionService(storageService, eventService, config.sessionTimeoutMs)
+                sessionService =
+                    SessionService(storageService, eventService, config.sessionTimeoutMs)
                 sessionService?.start()
 
                 // Save config for recovery when app is killed
