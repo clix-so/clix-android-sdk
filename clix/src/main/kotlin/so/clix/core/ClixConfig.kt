@@ -19,4 +19,5 @@ data class ClixConfig(
     val endpoint: String = "https://api.clix.so",
     val logLevel: ClixLogLevel = ClixLogLevel.INFO,
     val extraHeaders: Map<String, String> = emptyMap(),
+    val sessionTimeoutMs: Int = 30_000,
 )
