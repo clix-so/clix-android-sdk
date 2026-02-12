@@ -1,6 +1,7 @@
 package so.clix.services
 
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import kotlinx.coroutines.launch
@@ -23,6 +24,11 @@ internal class SessionService(
 
     fun start() {
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+
+        if (!ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+            ClixLogger.debug("App is in background, deferring session start")
+            return
+        }
 
         val lastActivity = storageService.get<Long>(LAST_ACTIVITY_KEY)
         if (lastActivity != null) {
