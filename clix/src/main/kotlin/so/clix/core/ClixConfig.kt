@@ -11,6 +11,8 @@ import so.clix.utils.logging.ClixLogLevel
  * @property endpoint The API endpoint URL.
  * @property logLevel The log level for the SDK.
  * @property extraHeaders Extra headers to be included in API requests.
+ * @property sessionTimeoutMs Session timeout in milliseconds. Sessions are ended after this
+ *   duration of inactivity. Defaults to 30 000 ms. A minimum of 5 000 ms is enforced at runtime.
  */
 @Serializable
 data class ClixConfig(
@@ -19,4 +21,5 @@ data class ClixConfig(
     val endpoint: String = "https://api.clix.so",
     val logLevel: ClixLogLevel = ClixLogLevel.INFO,
     val extraHeaders: Map<String, String> = emptyMap(),
+    val sessionTimeoutMs: Int = 30_000,
 )

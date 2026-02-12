@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import org.json.JSONObject
+import so.clix.core.Clix
 import so.clix.core.ClixNotification
 import so.clix.models.ClixPushNotificationPayload
 import so.clix.models.NotificationContext
@@ -47,6 +48,8 @@ class NotificationTappedActivity : AppCompatActivity() {
             return
         }
         ClixLogger.debug("Extracted messageId: $messageId")
+
+        Clix.sessionService?.setPendingMessageId(messageId)
 
         ClixNotification.handleNotificationTapped(
             context = this,

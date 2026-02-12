@@ -13,6 +13,7 @@ import so.clix.BuildConfig
 import so.clix.services.DeviceService
 import so.clix.services.EventService
 import so.clix.services.NotificationService
+import so.clix.services.SessionService
 import so.clix.services.StorageService
 import so.clix.services.TokenService
 import so.clix.utils.logging.ClixLogLevel
@@ -52,6 +53,7 @@ object Clix {
     internal lateinit var eventService: EventService
     internal lateinit var tokenService: TokenService
     internal lateinit var notificationService: NotificationService
+    internal var sessionService: SessionService? = null
     internal val coroutineScope = CoroutineScope(coroutineContext)
 
     internal const val VERSION = BuildConfig.VERSION
@@ -81,6 +83,9 @@ object Clix {
                 deviceService = DeviceService(storageService)
                 eventService = EventService()
                 notificationService = NotificationService(appContext, storageService, eventService)
+                sessionService =
+                    SessionService(storageService, eventService, config.sessionTimeoutMs)
+                sessionService?.start()
 
                 // Save config for recovery when app is killed
                 storageService.set(CONFIG_KEY, config)
