@@ -57,39 +57,25 @@ internal class NotificationService(
         createNotificationChannel()
     }
 
-    suspend fun handleNotificationReceived(
+    suspend fun handlePushReceived(
         payload: ClixPushNotificationPayload,
         notificationData: Map<String, Any?>,
         autoHandleLandingURL: Boolean = true,
     ) {
         try {
             if (hasNotificationPermission(context)) {
-                val shouldTrack = recordReceivedMessageId(payload.messageId)
-                if (!shouldTrack) {
-                    val eventName = NotificationEvent.PUSH_NOTIFICATION_RECEIVED.name
-                    ClixLogger.debug(
-                        "Skipping duplicate $eventName for messageId: ${payload.messageId}"
-                    )
-                    return
-                }
-
-                try {
-                    showNotification(payload, notificationData, autoHandleLandingURL)
-                    trackPushNotificationReceivedEvent(
-                        payload.messageId,
-                        payload.userJourneyId,
-                        payload.userJourneyNodeId,
-                    )
-                    ClixLogger.debug("Message received, notification sent to Clix SDK")
-                } catch (e: Exception) {
-                    recoverReceivedMessageId(payload.messageId)
-                    throw e
-                }
+                showNotification(payload, notificationData, autoHandleLandingURL)
+                trackPushNotificationReceivedEvent(
+                    payload.messageId,
+                    payload.userJourneyId,
+                    payload.userJourneyNodeId,
+                )
+                ClixLogger.debug("Message received, notification sent to Clix SDK")
             } else {
                 ClixLogger.warn("Notification permission not granted, cannot show notification")
             }
         } catch (e: Exception) {
-            ClixLogger.error("Failed to handle notification received", e)
+            ClixLogger.error("Failed to handle push received", e)
         }
     }
 
@@ -191,7 +177,7 @@ internal class NotificationService(
                 .setStyle(NotificationCompat.BigTextStyle().bigText(payload.body.orEmpty()))
                 .setTicker(payload.body.orEmpty())
                 .setAutoCancel(true)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setCategory(NotificationCompat.CATEGORY_MESSAGE)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setDefaults(NotificationCompat.DEFAULT_ALL)
@@ -239,7 +225,7 @@ internal class NotificationService(
         )
     }
 
-    private fun recordReceivedMessageId(messageId: String): Boolean {
+    internal fun recordReceivedMessageId(messageId: String): Boolean {
         synchronized(this) {
             val previous = storageService.get<String>(lastReceivedMessageIdKey)
             if (previous == messageId) {
@@ -250,7 +236,7 @@ internal class NotificationService(
         }
     }
 
-    private fun recoverReceivedMessageId(messageId: String) {
+    internal fun recoverReceivedMessageId(messageId: String) {
         synchronized(this) {
             val previous = storageService.get<String>(lastReceivedMessageIdKey)
             if (previous == messageId) {
@@ -268,6 +254,7 @@ internal class NotificationService(
                 description = descriptionText
                 enableVibration(true)
                 enableLights(true)
+                setShowBadge(true)
             }
         notificationManager.createNotificationChannel(channel)
     }

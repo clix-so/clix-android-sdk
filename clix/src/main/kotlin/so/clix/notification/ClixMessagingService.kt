@@ -49,7 +49,7 @@ open class ClixMessagingService : FirebaseMessagingService() {
         }
 
         Clix.coroutineScope.launch {
-            Clix.Notification.handleIncomingPayload(
+            Clix.Notification.handleNotificationReceived(
                 notificationData = notificationData,
                 payload = payload,
             )

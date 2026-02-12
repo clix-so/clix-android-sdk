@@ -225,46 +225,58 @@ object ClixNotification {
         }
     }
 
-    internal suspend fun handleIncomingPayload(
+    internal suspend fun handleNotificationReceived(
         notificationData: Map<String, Any?>,
         payload: ClixPushNotificationPayload,
     ) {
+        val shouldProcess = Clix.notificationService.recordReceivedMessageId(payload.messageId)
+        if (!shouldProcess) {
+            ClixLogger.debug("Duplicate message ignored for messageId: ${payload.messageId}")
+            return
+        }
+
         val isInForeground = isAppInForeground()
 
-        if (isInForeground) {
-            // Foreground: call onMessage handler (can suppress notification)
-            val handler = messageHandler
-            if (handler != null) {
-                val shouldDisplay =
+        try {
+            if (isInForeground) {
+                // Foreground: call onMessage handler (can suppress notification)
+                val handler = messageHandler
+                if (handler != null) {
+                    val shouldDisplay =
+                        try {
+                            handler(notificationData)
+                        } catch (e: Exception) {
+                            ClixLogger.error("Foreground message handler failed", e)
+                            true
+                        }
+                    if (!shouldDisplay) {
+                        ClixLogger.debug(
+                            "Foreground handler suppressed notification for ${payload.messageId}"
+                        )
+                        Clix.notificationService.recoverReceivedMessageId(payload.messageId)
+                        return
+                    }
+                }
+            } else {
+                // Background: call onBackgroundMessage handler (notification always displayed)
+                backgroundMessageHandler?.let { handler ->
                     try {
                         handler(notificationData)
                     } catch (e: Exception) {
-                        ClixLogger.error("Foreground message handler failed", e)
-                        true
+                        ClixLogger.error("Background message handler failed", e)
                     }
-                if (!shouldDisplay) {
-                    ClixLogger.debug(
-                        "Foreground handler suppressed notification for ${payload.messageId}"
-                    )
-                    return
                 }
             }
-        } else {
-            // Background: call onBackgroundMessage handler (notification always displayed)
-            backgroundMessageHandler?.let { handler ->
-                try {
-                    handler(notificationData)
-                } catch (e: Exception) {
-                    ClixLogger.error("Background message handler failed", e)
-                }
-            }
-        }
 
-        Clix.notificationService.handleNotificationReceived(
-            payload = payload,
-            notificationData = notificationData,
-            autoHandleLandingURL = autoHandleLandingURL,
-        )
+            Clix.notificationService.handlePushReceived(
+                payload = payload,
+                notificationData = notificationData,
+                autoHandleLandingURL = autoHandleLandingURL,
+            )
+        } catch (e: Exception) {
+            ClixLogger.error("Failed to handle notification received", e)
+            Clix.notificationService.recoverReceivedMessageId(payload.messageId)
+        }
     }
 
     private fun isAppInForeground(): Boolean {
