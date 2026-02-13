@@ -7,6 +7,7 @@ import so.clix.utils.ClixDateFormatter
 internal class EventService {
     private val eventAPIService = EventAPIService()
 
+    @Suppress("LongParameterList")
     suspend fun trackEvent(
         name: String,
         properties: Map<String, Any?> = emptyMap(),
