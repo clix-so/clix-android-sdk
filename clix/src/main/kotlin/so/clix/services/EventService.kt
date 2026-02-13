@@ -7,12 +7,14 @@ import so.clix.utils.ClixDateFormatter
 internal class EventService {
     private val eventAPIService = EventAPIService()
 
+    @Suppress("LongParameterList")
     suspend fun trackEvent(
         name: String,
         properties: Map<String, Any?> = emptyMap(),
         messageId: String? = null,
         userJourneyId: String? = null,
         userJourneyNodeId: String? = null,
+        sourceType: String? = null,
     ) {
         val customProperty =
             properties.mapValues { (_, value) ->
@@ -35,7 +37,7 @@ internal class EventService {
             )
 
         eventAPIService.trackEvents(
-            listOf(EventForRequest(Clix.environment.deviceId, name, eventProperty))
+            listOf(EventForRequest(Clix.environment.deviceId, name, eventProperty, sourceType))
         )
     }
 }

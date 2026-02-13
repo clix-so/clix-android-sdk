@@ -220,6 +220,7 @@ internal class NotificationService(
     ) {
         eventService.trackEvent(
             name = NotificationEvent.PUSH_NOTIFICATION_RECEIVED.name,
+            sourceType = "CLIX",
             messageId = messageId,
             userJourneyId = userJourneyId,
             userJourneyNodeId = userJourneyNodeId,
@@ -233,6 +234,7 @@ internal class NotificationService(
     ) {
         eventService.trackEvent(
             name = NotificationEvent.PUSH_NOTIFICATION_TAPPED.name,
+            sourceType = "CLIX",
             messageId = messageId,
             userJourneyId = userJourneyId,
             userJourneyNodeId = userJourneyNodeId,

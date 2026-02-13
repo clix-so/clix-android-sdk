@@ -16,6 +16,7 @@ internal data class EventForRequest(
     val deviceId: String,
     val name: String,
     val properties: EventProperties,
+    val sourceType: String? = null,
 )
 
 @Serializable
