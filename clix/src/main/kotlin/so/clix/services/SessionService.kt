@@ -34,6 +34,7 @@ internal class SessionService(
         if (lastActivity != null) {
             val elapsed = System.currentTimeMillis() - lastActivity
             if (elapsed <= effectiveTimeoutMs) {
+                pendingMessageId = null
                 updateLastActivity()
                 ClixLogger.debug("Continuing existing session")
                 return
