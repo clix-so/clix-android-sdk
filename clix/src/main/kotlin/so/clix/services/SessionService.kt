@@ -60,6 +60,7 @@ internal class SessionService(
             try {
                 eventService.trackEvent(
                     name = SessionEvent.SESSION_START.name,
+                    sourceType = "CLIX",
                     messageId = messageId,
                 )
                 ClixLogger.debug("${SessionEvent.SESSION_START.name} tracked")

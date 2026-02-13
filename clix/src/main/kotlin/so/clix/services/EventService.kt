@@ -13,6 +13,7 @@ internal class EventService {
         messageId: String? = null,
         userJourneyId: String? = null,
         userJourneyNodeId: String? = null,
+        sourceType: String? = null,
     ) {
         val customProperty =
             properties.mapValues { (_, value) ->
@@ -35,7 +36,7 @@ internal class EventService {
             )
 
         eventAPIService.trackEvents(
-            listOf(EventForRequest(Clix.environment.deviceId, name, eventProperty))
+            listOf(EventForRequest(Clix.environment.deviceId, name, eventProperty, sourceType))
         )
     }
 }
