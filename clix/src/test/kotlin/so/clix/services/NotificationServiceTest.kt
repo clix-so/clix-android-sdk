@@ -59,7 +59,7 @@ class NotificationServiceTest {
 
         // Then
         coVerify {
-            eventService.trackEvent(name = "PUSH_NOTIFICATION_TAPPED", messageId = messageId)
+            eventService.trackEvent(name = "PUSH_NOTIFICATION_TAPPED", messageId = messageId, sourceType = "CLIX")
         }
     }
 
