@@ -21,6 +21,8 @@ import org.robolectric.annotation.Config
 import so.clix.services.DeviceService
 import so.clix.services.EventService
 import so.clix.services.NotificationService
+import so.clix.services.SessionService
+import so.clix.services.StorageService
 import so.clix.services.TokenService
 import so.clix.utils.logging.ClixLogLevel
 import so.clix.utils.logging.ClixLogger
@@ -35,6 +37,8 @@ class ClixTest {
     private lateinit var eventService: EventService
     private lateinit var tokenService: TokenService
     private lateinit var notificationService: NotificationService
+    private lateinit var sessionService: SessionService
+    private lateinit var storageService: StorageService
 
     private lateinit var notificationManager: NotificationManagerCompat
 
@@ -46,6 +50,8 @@ class ClixTest {
         eventService = mockk(relaxed = true)
         tokenService = mockk(relaxed = true)
         notificationService = mockk(relaxed = true)
+        sessionService = mockk(relaxed = true)
+        storageService = mockk(relaxed = true)
         notificationManager = mockk(relaxed = true)
 
         // Mock application context
@@ -74,6 +80,12 @@ class ClixTest {
         every { Clix.eventService } returns eventService
         every { Clix.tokenService } returns tokenService
         every { Clix.notificationService } returns notificationService
+        every { Clix.sessionService } returns sessionService
+        every { Clix.storageService } returns storageService
+
+        // Directly assign nullable field (mockkObject only intercepts the getter,
+        // but Kotlin may access the backing field directly for non-lateinit vars)
+        Clix.sessionService = sessionService
 
         // Create a mock environment
         val mockEnvironment = mockk<ClixEnvironment>()
@@ -115,6 +127,21 @@ class ClixTest {
 
         // Then
         coVerify { deviceService.setProjectUserId(userId) }
+    }
+
+    @Test
+    fun `it should reset all local state`() {
+        // Given
+        initializeAndInjectMocks()
+
+        // When
+        Clix.reset()
+
+        // Then
+        verify { notificationService.reset() }
+        verify { sessionService.stop() }
+        verify { storageService.remove("clix_device_id") }
+        verify { storageService.remove("clix_session_last_activity") }
     }
 
     @Test

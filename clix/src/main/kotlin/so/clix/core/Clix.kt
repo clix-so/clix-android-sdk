@@ -142,12 +142,32 @@ object Clix {
     }
 
     /** Removes the user ID for the current user. */
+    @Deprecated("Use reset() instead", ReplaceWith("reset()"))
     @JvmStatic
     suspend fun removeUserId() {
         try {
             deviceService.removeProjectUserId()
         } catch (e: Exception) {
             ClixLogger.error("Failed to remove user ID", e)
+        }
+    }
+
+    /**
+     * Resets all local SDK state including device ID.
+     *
+     * After calling this method, you must call [initialize] again before using the SDK. Use this
+     * when a user logs out and you want to start fresh with a new device identity.
+     */
+    @JvmStatic
+    fun reset() {
+        try {
+            notificationService.reset()
+            sessionService?.stop()
+            storageService.remove("clix_device_id")
+            storageService.remove("clix_session_last_activity")
+            isInitialized = false
+        } catch (e: Exception) {
+            ClixLogger.error("Failed to reset", e)
         }
     }
 
