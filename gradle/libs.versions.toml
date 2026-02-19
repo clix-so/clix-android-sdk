@@ -1,5 +1,5 @@
 [versions]
-clix = "1.4.1"
+clix = "1.5.0"
 # Plugins
 android-gradle-plugin = "8.9.2"
 gms = "4.4.2"
