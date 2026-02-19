@@ -25,6 +25,10 @@ internal class SessionService(
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
     }
 
+    fun stop() {
+        ProcessLifecycleOwner.get().lifecycle.removeObserver(this)
+    }
+
     override fun onStart(owner: LifecycleOwner) {
         checkOrStartSession()
     }

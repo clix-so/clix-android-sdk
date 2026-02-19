@@ -162,6 +162,7 @@ object Clix {
     fun reset() {
         try {
             notificationService.reset()
+            sessionService?.stop()
             storageService.remove("clix_device_id")
             storageService.remove("clix_session_last_activity")
             isInitialized = false
