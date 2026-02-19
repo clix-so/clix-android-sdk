@@ -83,6 +83,10 @@ class ClixTest {
         every { Clix.sessionService } returns sessionService
         every { Clix.storageService } returns storageService
 
+        // Directly assign nullable field (mockkObject only intercepts the getter,
+        // but Kotlin may access the backing field directly for non-lateinit vars)
+        Clix.sessionService = sessionService
+
         // Create a mock environment
         val mockEnvironment = mockk<ClixEnvironment>()
         every { mockEnvironment.config } returns config
