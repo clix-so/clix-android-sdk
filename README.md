@@ -19,7 +19,7 @@ Add the dependency to your app's `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-  implementation("so.clix:clix-android-sdk:1.3.2")
+  implementation("so.clix:clix-android-sdk:1.5.0")
 }
 ```
 
@@ -88,12 +88,19 @@ lifecycleScope.launch {
   Clix.removeUserProperty("name")
   Clix.removeUserProperties(listOf("age", "premium"))
 }
+```
 
-// Remove user ID
+### Reset
+
+Use `reset()` when you need a completely fresh device identity (e.g., shared device scenarios). This generates a new device ID, removes the user ID, and clears session data.
+
+```kotlin
 lifecycleScope.launch {
-  Clix.removeUserId()
+  Clix.reset()
 }
 ```
+
+> **Note:** After calling `reset()`, you must call `initialize()` again before using the SDK.
 
 ### Event Tracking
 
