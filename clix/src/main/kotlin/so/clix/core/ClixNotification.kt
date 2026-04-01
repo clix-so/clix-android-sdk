@@ -304,11 +304,12 @@ object ClixNotification {
         val shouldAutoOpen = autoHandleLandingURL && notificationContext.autoOpenLandingURL
         if (shouldAutoOpen) {
             openLandingURLIfPresent(context, payload.landingUrl)
+        } else if (openedHandler == null) {
+            openApp(context)
         } else {
             ClixLogger.debug(
                 "Auto open disabled, skipping landing navigation for ${payload.messageId}"
             )
-            openApp(context)
         }
     }
 
