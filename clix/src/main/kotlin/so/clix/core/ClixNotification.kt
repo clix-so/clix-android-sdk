@@ -304,6 +304,8 @@ object ClixNotification {
         val shouldAutoOpen = autoHandleLandingURL && notificationContext.autoOpenLandingURL
         if (shouldAutoOpen) {
             openLandingURLIfPresent(context, payload.landingUrl)
+        } else if (openedHandler == null) {
+            openApp(context)
         } else {
             ClixLogger.debug(
                 "Auto open disabled, skipping landing navigation for ${payload.messageId}"
@@ -332,6 +334,21 @@ object ClixNotification {
         } catch (e: Exception) {
             ClixLogger.error("Failed to launch landing destination", e)
             false
+        }
+    }
+
+    private fun openApp(context: Context) {
+        val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+        if (intent == null) {
+            ClixLogger.warn("Unable to resolve launch intent for package")
+            return
+        }
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        try {
+            context.startActivity(intent)
+            ClixLogger.debug("Launched app without landing navigation")
+        } catch (e: Exception) {
+            ClixLogger.error("Failed to launch app", e)
         }
     }
 
